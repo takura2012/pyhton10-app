@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}
+Пользователь
+{% endblock %}
+
+{% block body %}
+    <div class="mb-2">
+        <a href="/" class="me-4">Главная</a>
+        <a href="/users_administration" class="me-4">Назад</a>
+    </div>
+<hr>
+<div class="">
+    <strong>id:</strong> {{user.id}}
+</div>
+<div class="">
+    <strong>name:</strong> {{user.name}}
+</div>
+<div class="">
+    <strong>role:</strong> {{user.role}}
+</div>
+<div class="">
+    <strong>email:</strong> {{user.email}}
+</div>
+<div class="">
+    <strong>language:</strong> {{user.language}}
+</div>
+<div class="">
+    <strong>registration:</strong> {{user.date_registration}}
+</div>
+<div class="">
+    <strong>activity:</strong> {{user.date_last_activity}}
+</div>
+<div class="">
+    <strong>LTO:</strong> {{prefs.LTO}}
+</div>
+<hr>
+<div class="">
+    <strong>Тренировки пользователя</strong>
+
+    {% for train in sorted_user_trainings %}
+        <div class="row">
+            <div class="col-3">
+                {{train.name}}
+            </div>
+            <div class="col-1">
+                {% if train.complete %}
+                    Completed
+                {% else %}
+                    Assigned
+                {% endif %}
+            </div>
+            <div class="col">
+                {% if train.complete %}
+                    {{train.date_complete}}
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+
+        </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

@@ -112,8 +112,8 @@ def register():
 
             date_registration = datetime.utcnow()
             date_last_activity = date_registration
-            user_time_offset = int(request.form.get('user_time_offset'))
-            preferences = json.dumps({'follow': True, 'user_time_offset': user_time_offset})
+            LTO = int(request.form.get('LTO', '0'))
+            preferences = json.dumps({'follow': True, 'LTO': LTO})
             user = User(name=username, password=hashed_password, email=email, preferences=preferences,
                         language=default_language, date_registration=date_registration, date_last_activity=date_last_activity)
             db.session.add(user)
@@ -1394,7 +1394,7 @@ def statistics_exercises():
 @app.route('/personal')
 @login_required
 def personal():
-    account_types = config.ACCOUNT_TYPES_RU
+    account_types = config.ACCOUNT_TYPES
     languages = config.LANGUAGES
     if not current_user:
         return render_template('management.html')
@@ -1622,6 +1622,9 @@ def users_administration():
     users = User.query.all()
     users_count = len(users)
 
+    account_types = config.ACCOUNT_TYPES
+
+    account_colors = config.ACCOUNT_COLORS
     sorted_users = sorted(users, key=lambda user: user.date_registration, reverse=True)
 
     structured_users = {}
@@ -1630,7 +1633,7 @@ def users_administration():
         structured_user = {}
 
         user_prefs = json.loads(user.preferences)
-        local_time_offset = user_prefs.get('user_time_offset', 0)
+        local_time_offset = user_prefs.get('LTO', 0)
         structured_user['id'] = user.id
         structured_user['name'] = user.name
         structured_user['email'] = user.email
@@ -1648,10 +1651,34 @@ def users_administration():
             structured_users[date_registration_short] = []
             structured_users[date_registration_short].append(structured_user)
 
-    return render_template('users.html', structured_users=structured_users, users_count=users_count)
 
 
+    return render_template('users.html', structured_users=structured_users, users_count=users_count,
+                           account_types=account_types, account_colors=account_colors)
 
+
+@app.route('/user_details/<int:user_id>')
+def user_details(user_id):
+
+    user = User.query.get(user_id)
+    prefs = json.loads(user.preferences)
+
+    user_trainings = UserTraining.query.filter_by(user_id=user.id).all()
+    user_trainings_ids = [user_training.training_id for user_training in user_trainings]
+    trainings = Training.query.filter(Training.training_id.in_(user_trainings_ids)).all()
+
+    trainings_dict = {train.training_id: train.name for train in trainings}
+
+    user_trainings_list = []
+    for user_training in user_trainings:
+        user_trainings_list.append({'name':trainings_dict[user_training.training_id], 'complete': user_training.completed,
+                                    'date_complete': user_training.date_completed.strftime('%d-%m-%y %H:%M') if user_training.date_completed is not None else 'x'})
+
+    sorted_user_trainings = sorted(user_trainings_list, key=lambda ut: ut['date_complete'], reverse=True)
+
+    print(sorted_user_trainings)
+
+    return render_template('user_details.html', user=user, prefs=prefs, sorted_user_trainings=sorted_user_trainings)
 
 # -------------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -1663,4 +1690,4 @@ if __name__ == '__main__':
     #         db.create_all()
     #     except Exception as e:
     #         print(e)
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=True)

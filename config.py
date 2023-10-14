@@ -3,12 +3,6 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///fitness.db'
 SESSION_TYPE = 'filesystem'
 RESERVED_NAMES = ['admin', 'админ', 'old_training']
 
-ACCOUNT_TYPES_EN = {
-    'user': 'Standart account',
-    'paid_user': 'Paid account',
-    'premium': 'Premium account',
-    'admin': 'admin'
-}
 
 ACCOUNT_COLORS = {
     'user': '#202050',
@@ -17,7 +11,7 @@ ACCOUNT_COLORS = {
     'admin': '#DC143C'
 }
 
-ACCOUNT_TYPES_RU = {
+ACCOUNT_TYPES = {
     'user': 'Registered',
     'paid_user': 'Paid',
     'premium': 'Premium',
