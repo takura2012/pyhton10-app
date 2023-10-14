@@ -1,0 +1,25 @@
+<div class="modal fade" id="delete_train" tabindex="-1" aria-labelledby="delete_trainLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="delete_trainLabel">{{local_dict['Delete_workout'][current_user.language]}}</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body alert alert-secondary">
+
+                {{local_dict['Delete_workout'][current_user.language]}}: <b>{{train.name}}</b> ?<br>
+                ({{local_dict['Impossible_restore_train'][current_user.language]}})
+                <input type="hidden" name="train_id_hidden" value="{{train.training_id}}">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{local_dict['Cancel'][current_user.language]}}
+                </button>
+                <button type="submit" class="btn btn-danger">
+                    {{local_dict['Delete'][current_user.language]}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

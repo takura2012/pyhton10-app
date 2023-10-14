@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}
+Создание упражнений
+{% endblock %}
+
+{% block body %}
+    {% if current_user.role == "admin" %}
+        <div class="">
+            <a href="/index" class="me-4">Главная</a>
+            <a href="/list">Список упражнений</a>
+        </div>
+            <h1>Создание упражнений</h1>
+        <form method="post">
+            <div class="row mb-3 text-left">
+                <div class="col-md-6">
+                    <p>Столбец слева</p>
+
+                        <input type="text" name="name" id="name" class="form-control" placeholder="Название упражнения"><br>
+                        <select name="select_target" class="form-select form-select-md mb-3" aria-label=".form-select-md example">
+                            {% for target in targets %}
+                                <option value="{{target}}">{{target}}</option>
+                            {% endfor %}
+                        </select>
+                        <textarea name="description" id="description" class="form-control" rows="5" placeholder="Описание упражнения"></textarea><br>
+                        <input type="number" name="difficulty" id="difficulty" class="form-control" placeholder="Сложность (1-10)"><br>
+                        <input type="number" name="time_per_set" id="time_per_set" class="form-control" placeholder="Время на подход (мин)"><br>
+                        <input type="submit" class="btn btn-success" value="Подтвердить">
+
+                </div>
+                <div class="col-md-6">
+                    <b>Фильтры:</b><br>
+                    {% for i in range(config_filters|length) %}
+                        {% for key, filter in config_filters[i].items() %}
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="filters{{i+1}}" value="{{key}}" id="chk_{{key}}">
+                                <label class="form-check-label" for="chk_{{key}}">
+                                   {{filter}}
+                                </label>
+                            </div>
+
+                        {% endfor %}
+                    <hr>
+                    {% endfor %}
+                </div>
+            </div>
+        </form>
+    {% endif %}
+{% endblock %}

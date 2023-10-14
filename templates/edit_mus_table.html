@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}
+Главная
+{% endblock %}
+
+{% block body %}
+    {% if current_user.role == "admin" %}
+        <form method="post">
+            <div class="row mb-0">
+                <div class="col-6">
+                    <h3> Редактирование :</h3>
+                </div>
+                <div class="col-6">
+                    {% if muscle.counter > 1 %}
+                        <a href="/list/mu{{ muscle.counter - 1 }}/edit" class="btn btn-info">Предыдущее</a>
+                    {% endif %}
+                    {% if muscle.counter < mu_len %}
+                        {% set next_counter = muscle.counter + 1 %}
+                        <a href="/list/mu{{ next_counter }}/edit" class="btn btn-info">Следующее</a>
+                    {% endif %}
+                </div>
+            </div>
+            <hr>
+            <h4>id:{{muscle.muscle_id}} N{{muscle.counter}} {{muscle.muscle_name}}</h4>
+            <div class="col-6">
+            <br><span>Название:</span>
+            <input type="text" name="name" id="name" class="form-control" value="{{muscle.muscle_name}}"><br>
+
+            <div class="row mb-3 align-items-center">
+                <div class="col-9">
+                    <input type="submit" class="btn btn-success" value="Сохранить">
+                </div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteMuscle">
+                        Удалить
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+        <form method="post" action="/list/mu{{muscle.counter}}/del">
+            <!-- Модальное окно подтверждения удаления -->
+            {% include '/modals/modal_del_muscle.html' %}
+        </form>
+
+    {% endif %}
+{% endblock %}

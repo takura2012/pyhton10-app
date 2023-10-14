@@ -1,0 +1,29 @@
+<div class="modal fade" id="rename_plan" tabindex="-1" aria-labelledby="rename_planLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="rename_planLabel">
+                    {{local_dict['Plan_rename'][current_user.language]}}
+                </h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body alert alert-secondary">
+                <div class="container">
+                    {{local_dict['Rename'][current_user.language]}} : <b>{{plan.name}}</b> ?
+                </div>
+                <div class="container">
+                    <input type="text" name="plan_new_name" class="form-control" required placeholder="{{local_dict['Rename_placeholder'][current_user.language]}}">
+                    <input type="hidden" name="plan_id" value="{{plan.id}}">
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{local_dict['Cancel'][current_user.language]}}
+                </button>
+                <input type="submit" class="btn btn-success" value="{{local_dict['Confirm'][current_user.language]}}">
+            </div>
+        </div>
+    </div>
+</div>

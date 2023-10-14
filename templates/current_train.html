@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}
+{{local_dict['Start training'][current_user.language]}}
+{% endblock %}
+
+{% block body %}
+
+<div class="account-block pt-3">
+    {% if not current_train %}
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="fs-3">
+        <h1>{{local_dict['No_assigneg_workouts'][current_user.language]}}</h1>
+        <p><a href="/plans_all">
+            {{local_dict['Assign'][current_user.language]}}</a> {{local_dict['workout_plan'][current_user.language]}}. </p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% include "/modals/flash_mess.html" %}
+
+    {% if current_train %}
+    <form action="/train_progress_start" method="post">
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success w-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-activity" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2Z"/>
+                    </svg>
+                    {{local_dict['Run'][current_user.language]}}
+                </button>
+                <input type="hidden" name="train_id" value="{{ current_train.training_id }}">
+                <input type="hidden" name="user_id" value="{{ current_user.id }}">
+            </div>
+    </form>
+            <div class="fs-4 fw-semibold">
+                {{train_local_name}}
+            </div>
+
+                <hr>
+                    {% for exercise in current_train_exlist %}
+                            <div class="m-1 fs-5 {% if exercise[4] %} text-secondary {% else %} text-success-emphasis {% endif %}">
+                                    {{ exercise[0] }}: {{ exercise[1] }}x{{exercise[2] }} {% if exercise[4] %} <span class="fs-6">
+                                ({{local_dict['Completed'][current_user.language]}})
+                            </span> {% endif %}
+                            </div>
+                    {% endfor %}
+            <hr>
+
+                <div class="">
+                    <div class="row mt-1 justify-content-center text-center">
+                        <div class="col rounded-0 p-2 btn-train_progress_start">
+                            <a href="/plans_all" class="str-link link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-left-right" viewBox="0 0 16 16">
+                                  <path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"/>
+                                </svg>
+
+                            </a>
+                        </div>
+
+                        <div class="col rounded-0 p-2 btn-train_progress_start">
+                            <a href="/" class="str-link link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-left-circle" viewBox="0 0 16 16">
+                                  <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-4.5-.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                                </svg>
+                            </a>
+                        </div>
+
+                        <div class="col rounded-0 p-2 btn-train_progress_start">
+                            <a href="/user_complete_train/{{current_train.training_id}}" class="str-link link-danger link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+    {% endif %}
+</div>
+{% endblock %}

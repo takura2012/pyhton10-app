@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}
+Управление пользователями
+{% endblock %}
+
+{% block body %}
+<div class="mb-2">
+    <a href="/" class="me-4">Главная</a>
+    <a href="/migration" class="me-4">Назад</a>
+</div>
+<div class="">
+    Количество пользователей: {{users_count}}
+</div>
+
+
+
+
+
+
+
+ {% for date, users in structured_users.items() %}
+    <div class="">
+        <a class="" data-bs-toggle="collapse" href="#collapseExample{{date}}" role="button" aria-expanded="false" aria-controls="collapseExample">
+            <strong>{{date}}</strong>
+        </a>
+        +{{users|length}}
+        <div class="collapse" id="collapseExample{{date}}">
+            <div class="">
+
+                <div class="row fw-semibold">
+                    <div class="col-2 ps-4">
+                        NM
+                    </div>
+                    <div class="col-3">
+                        EM
+                    </div>
+                    <div class="col">
+                        RL
+                    </div>
+                    <div class="col">
+                        LN
+                    </div>
+                    <div class="col">
+                        RD
+                    </div>
+                    <div class="col">
+                        AD
+                    </div>
+                    <div class="col">
+                        LTO
+                    </div>
+                </div>
+
+                {% for user in users %}
+                    <div class="row">
+                        <div class="col-2">
+                            <div class="d-flex">
+                                <div class="mx-2">
+                                    <a href="#{{user.id}}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                          <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                          <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                                <div class="">
+                                    {{user.name}}
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="col-3">
+                            {{user.email}}
+                        </div>
+                        <div class="col">
+                            {{user.role}}
+                        </div>
+                        <div class="col">
+                            {{user.language}}
+                        </div>
+                        <div class="col">
+                            {{user.date_registration}}
+                        </div>
+                        <div class="col">
+                            {{user.date_last_activity}}
+                        </div>
+                        <div class="col">
+                            {{user.local_time_offset}}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+
+{% endblock %}

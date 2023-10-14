@@ -1,0 +1,31 @@
+<div class="modal fade" id="modal_filters" tabindex="-1" aria-labelledby="modal_filters" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="someh3">Установите нужные фильтры</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body alert alert-secondary">
+
+            {% for i in range(const_config['filter_list']|length) %}
+                {% for key, filter in const_config['filter_list'][i].items() %}
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="filters{{i+1}}" value="{{key}}" id="chk_{{key}}" {% if key in index_dict['filter_list'][i] %} checked {% endif %}>
+                        <label class="form-check-label" for="chk_{{key}}">
+                           {{filter}}
+                        </label>
+                    </div>
+
+                {% endfor %}
+            <hr>
+            {% endfor %}
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-success">Применить</button>
+            </div>
+        </div>
+    </div>
+</div>

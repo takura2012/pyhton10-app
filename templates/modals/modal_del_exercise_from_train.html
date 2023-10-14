@@ -1,0 +1,41 @@
+<div class="modal fade" id="confirmDelete{{ te_info[0].exercise_id }}" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="confirmDeleteLabel">{{te_info[0].name}}</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body alert alert-secondary">
+                <div class="row">
+                    <div class="col-6 text-end">
+                        Подходы
+                    </div>
+                    <div class="col-6">
+                        <input type="number" name="modal_sets" class="form-control" value={{ te_info[1] }}>
+                    </div>
+                    <div class="col-6 text-end">
+                        Повторения
+                    </div>
+                    <div class="col-6">
+                        <input type="number" name="modal_reps" class="form-control" value={{ te_info[2] }}>
+                    </div>
+                </div>
+                <input type="hidden" name="exercise_id" value="{{ te_info[0].exercise_id }}">
+
+
+            </div>
+            <div class="row mb-3 ms-3">
+                <div class="col-2">
+                <a href="/train_del_exercise/{{train.training_id}}/{{te_info[0].exercise_id}}" class="btn btn-danger">Удалить</a>
+                </div>
+                <div class="col-4 ">
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Сохранить</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

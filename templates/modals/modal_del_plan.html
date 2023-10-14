@@ -1,0 +1,30 @@
+<div class="modal fade" id="delete_plan" tabindex="-1" aria-labelledby="delete_planLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="delete_planLabel">
+                    {{local_dict['Delete_plan'][current_user.language]}}
+                </h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body alert alert-secondary">
+                <div class="container">
+                    {{local_dict['Delete'][current_user.language]}} : <b>{{plan.name}}</b> ?
+                </div>
+                <div class="container text-danger">
+                    ({{local_dict['impossible_to_restore'][current_user.language]}})
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{local_dict['Cancel'][current_user.language]}}
+                </button>
+                <a href="/plan_delete/{{plan.id}}" class="btn btn-danger">
+                    {{local_dict['Delete'][current_user.language]}}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

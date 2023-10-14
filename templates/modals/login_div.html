@@ -1,0 +1,17 @@
+
+
+<div class="text-center mb-3 border p-5">
+    <input class="form-control mb-2" name="username" type="text" placeholder="{{local_dict['User'][default_language]}}" required>
+    <input class="form-control mb-2" name="password" type="password" placeholder="{{local_dict['Password'][default_language]}}" required>
+
+    <input type="submit" class="btn btn-success stretched" value="{{local_dict['Login'][default_language]}}">
+    <div class="row mt-2">
+        <div class="col"><a href="/register" class="">
+            {{local_dict['Registration'][default_language]}}
+        </a></div>
+        <div class="col"><a href="/restore_account" class="" id="restore_account_link">
+            {{local_dict['Restore'][default_language]}}
+        </a></div>
+
+    </div>
+</div>

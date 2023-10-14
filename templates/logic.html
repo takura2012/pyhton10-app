@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}
+Логика
+{% endblock %}
+
+{% block body %}
+
+    <h1>Выборка упражнений</h1>
+<div class="container ">
+<form method="post" action="/logic">
+    <div class="row mb-3">
+        <div class="col-6">
+            <div class="d-flex align-items-center">
+                <select name="select_target" id="select_target" class="form-select form-select-md mb-3 me-2" aria-label=".form-select-md example">
+                    {% for ex in exercises %}
+                        <option value="{{ ex.exercise_id }}">{{ex.name}}</option>
+                    {% endfor %}
+                </select>
+                <a href="/logic/exclude/1" id="excludeLink" name="excludeLink" class="btn btn-outline-warning mb-3 me-2">Исключить</a>
+
+            </div>
+            {% for ex in selected_result %}
+
+
+                    {{loop.index0+1}}. {{ex.name}} - {{ex.target}} - {{ex.difficulty}}
+                <br>
+            {% endfor %}
+        </div>
+        <div class="col-3">
+            <div class="d-flex align-items-center">
+                <span class="m-3">Сила: </span>
+                <input type="number" class="form-control mb-3" name="max_effort" id="max_effort" placeholder="70" value="{{max_effort}}">
+            </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="target" value="Ноги" id="target1" {% if 'Ноги' in targets_list %}checked{% endif %}>
+                    <label class="form-check-label" for="target1">
+                        Ноги
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="target" value="Спина" id="target2" {% if 'Спина' in targets_list %}checked{% endif %}>
+                    <label class="form-check-label" for="target2">
+                        Спина
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="target" value="Грудь" id="target3" {% if 'Грудь' in targets_list %}checked{% endif %}>
+                    <label class="form-check-label" for="target3">
+                        Грудь
+                    </label>
+            </div>
+        </div>
+        <div class="col-3"><button type="submit" class="btn btn-info mb-3">Сделать список</button>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="target" value="Плечи" id="target4" {% if 'Плечи' in targets_list %}checked{% endif %}>
+                <label class="form-check-label" for="target4">
+                    Плечи
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="target" value="Бицепс" id="target5" {% if 'Бицепс' in targets_list %}checked{% endif %}>
+                <label class="form-check-label" for="target5">
+                    Бицепс
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="target" value="Трицепс" id="target6" {% if 'Трицепс' in targets_list %}checked{% endif %}>
+                <label class="form-check-label" for="target6">
+                    Трицепс
+                </label>
+            </div>
+        </div>
+        <hr class="mb-3 mt-3">
+    </div>
+</form>
+</div>
+
+<div class="container">
+    <h6>Исключено (вернуть):</h6>
+    <div class="row mb-3">
+        <div class="col-4 align-items-left">
+        {% for ex in excluded_exercises %}
+            <a href="/logic/retrieve/{{ex.exercise_id}}" class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover d-block">{{ ex.name }}</a>
+        {% endfor%}
+        </div>
+        <div class="col-8">
+            {% for pc, mus in all_muscles.items() %}
+                {{mus.muscle_name}} {{pc[4:]}} % <br>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+  // Получаем ссылку и селект по их ID
+  const excludeLink = document.getElementById('excludeLink');
+  const Select_target = document.getElementById('select_target');
+
+  // Добавляем обработчик события при изменении выбранного элемента в селекте
+  Select_target.addEventListener('change', function() {
+    // Получаем выбранное значение
+    const selectedValue = Select_target.value;
+
+    const url = "/logic/exclude/"+selectedValue;
+
+    // Обновляем атрибут href ссылки
+    excludeLink.href = url;
+  });
+</script>
+
+
+
+{% endblock %}

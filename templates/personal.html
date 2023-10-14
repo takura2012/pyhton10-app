@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}
+Главная
+{% endblock %}
+
+{% block body %}
+
+
+<div class="account-block pt-3">
+
+    <div class="text-center">
+        {% include "/modals/flash_mess.html" %}
+    </div>
+    {% if not user.is_anonymous %}
+
+        <div class="fs-3">
+            {{current_user.name}}
+        </div>
+        <div class="d-flex justify-content-between">
+
+            <div class="d-flex">
+                <div class="fs-5 me-4"><span style="color: {{account_color}};">{{local_dict[user_account_type][current_user.language]}}</span></div>
+
+                <div class="dropdown">
+                  <a class="dropdown-toggle link-underline link-underline-opacity-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <img src="/static/flags/{{current_user.language}}.png" alt="UA" class="me-2">
+                      {{current_user.language}}
+                  </a>
+                  <ul class="dropdown-menu">
+                    {% for language in languages %}
+                        <li><a class="dropdown-item" href="/language_change/{{language}}">
+                            <img src="/static/flags/{{language}}.png" alt="UA" class="me-2">
+                            {{language}}
+                        </a></li>
+                    {% endfor %}
+                  </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="chk_follow" name="follow" {% if preferences["follow"] %} checked {% endif %}>
+            <label class="form-check-label" for="chk_follow">
+                {{local_dict['follow_pref'][current_user.language]}}
+            </label>
+        </div>
+
+            <div class="py-3 fs-4">
+                <div class="fs-5" >
+
+                    <form action="/change_password" method="post">
+                        <div class="mb-3">
+                            <span>{{local_dict['Password change'][current_user.language]}}</span>
+                            <input type="password" name="old_password" class="form-control mb-2 mt-2" placeholder="{{local_dict['Current password'][current_user.language]}}">
+                            <input type="password" name="new_password" class="form-control mb-2" placeholder="{{local_dict['New password'][current_user.language]}}" required>
+                            <input type="password" name="repeat_new_password" class="form-control mb-2" placeholder="{{local_dict['Repeat new password'][current_user.language]}}" required>
+
+                                <div class="account-item fs-5 flex-grow-1 m-0 p-0">
+                                    <button type="submit" class="submit-no-border text-success d-flex str-link p-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-check-lg mt-1 me-2" viewBox="0 0 16 16">
+                                          <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                                        </svg>
+                                        {{local_dict['Confirm'][current_user.language]}}
+                                    </button>
+                                </div>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+
+    <div class="row m-0">
+            <div class="col m-0 btn-personal fs-5 p-2">
+                         <a href="/account" class="str-link link-underline link-underline-opacity-0">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-left-circle" viewBox="0 0 16 16">
+                              <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-4.5-.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                            </svg>
+                             {{local_dict['Back'][current_user.language]}}
+                         </a>
+            </div>
+
+            <div class="col m-0 btn-personal fs-5 p-2">
+                         <a href="/user_logout" class="str-link link-underline link-underline-opacity-0 link-danger">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-person-x" viewBox="0 0 16 16">
+                              <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm.256 7a4.474 4.474 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1h5.256Z"/>
+                              <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-.646-4.854.646.647.646-.647a.5.5 0 0 1 .708.708l-.647.646.647.646a.5.5 0 0 1-.708.708l-.646-.647-.646.647a.5.5 0 0 1-.708-.708l.647-.646-.647-.646a.5.5 0 0 1 .708-.708Z"/>
+                            </svg>
+                             {{local_dict['Logout'][current_user.language]}}
+                         </a>
+            </div>
+
+        </div>
+        {% else %}
+
+            <div class="p-5 fs-3">
+            <h1>There is nothing here. Log in on the main page.</h1>
+            </div>
+        {% endif %}
+
+</div>
+
+
+{% endblock %}

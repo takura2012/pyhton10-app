@@ -1,0 +1,266 @@
+body {
+    background-image: url('../imgs/background.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+
+.bg-opacity-50 {
+    background-color: rgba(0, 0, 0, 0.5); /* Прозрачный цвет фона */
+}
+
+.bg-opacity-20 {
+    background-color: rgba(0, 0, 0, 0.2); /* Прозрачный цвет фона */
+}
+
+.bg-opacity-60 {
+    background-color: rgba(0, 0, 0, 0.6); /* Прозрачный цвет фона */
+}
+
+.bg-opacity-0 {
+    background-color: rgba(0, 0, 0, 0); /* Прозрачный цвет фона */
+    transition: background-color 0.3s; /* Добавим плавный переход для hover */
+}
+
+.bg-opacity-0:hover {
+
+}
+
+.dark-hover {
+
+}
+
+.dark-hover:hover {
+    background-color: rgba(0, 0, 80, 0.2);
+}
+
+.nav-link.active {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.center-block {
+
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+
+}
+
+.index-div {
+    display: inline-block;
+    margin: 10px; /* добавьте отступы по вашему желанию */
+}
+
+.str-link {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+
+.stretched {
+    width: 100%;
+    height: 100%;
+}
+
+
+.content {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+}
+
+.text-dark-red {
+    color: rgb(128,0,0);
+}
+
+.custom-flash-warning {
+    background-color: rgb(255,222,173);
+    border: 1px solid rgb(139,69,19);
+    position: absolute;
+    top: 10%; /* Расположение блока сверху страницы */
+    left: 0;
+    width:70%;
+    max-width: 300px;
+    left: 50%; /* Расположение блока по горизонтали в центре */
+    transform: translateX(-50%);
+    z-index: 9999; /* Устанавливает блок поверх других элементов */
+}
+
+.index-div {
+    justify-content: center;
+    padding: 30px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: rgb(255,255,240);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 300px;
+    width: 100%;
+}
+
+.statistics-btn {
+    display: flex;
+    justify-content: center;
+    padding: 2px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: rgba(255,255,240, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 150px;
+    width: 100%;
+}
+
+.image-placeholder {
+    display: flex;
+    justify-content: center;
+    padding: 2px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: rgb(125,125,124);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
+    min-height: 300px;
+    width: 100%;
+}
+
+.background-custom-light {
+    background-color: rgba(255,255,240, 0.8);
+}
+
+/* Переопределение высоты заголовка аккордеона */
+.accordion-header {
+    background-color: rgba(255,255,240, 0);
+    height: 30px; /* Здесь можно задать желаемую высоту в пикселях или другой единице измерения */
+    /* Другие стили, если необходимо */
+}
+
+/* Изменение стиля кнопки в заголовке аккордеона */
+.accordion-button {
+    height: 30px;
+    background-color: rgba(255,255,240, 0.8);
+    /* Другие стили, если необходимо */
+}
+
+.nav-tabs .nav-item .nav-link {
+    color: black;
+}
+
+/* Стили для активной закладки (ваш селектор) */
+.nav-tabs .nav-item .nav-link.active {
+    /* Ваши стили для активной закладки */
+    background-color: rgba(255,255,240, 0); /* Пример: изменение цвета фона */
+    border-bottom: solid black;
+    border-width: 1px;
+}
+
+.bg-white-op-50 {
+    background-color: rgba(255,255,255, 0.3);
+}
+
+.user_avatar_div {
+    width: 100%;
+    max-width: 100px;
+}
+
+.img-fluid {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Это свойство сохраняет пропорции и заполняет блок целиком */
+}
+
+.custom-centred {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width:100%;
+    max-width: 300px;
+    left: 50%; /* Расположение блока по горизонтали в центре */
+    transform: translateX(-50%);
+}
+
+.account-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width:100%;
+    max-width: 500px;
+
+    left: 50%; /* Расположение блока по горизонтали в центре */
+    transform: translateX(-50%);
+}
+
+.localization-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width:100%;
+    max-width: 900px;
+
+    left: 50%; /* Расположение блока по горизонтали в центре */
+    transform: translateX(-50%);
+}
+
+
+.account-item {
+    width: 100%;
+    background-color: rgba(255,255,255, 0.5);
+    margin: 3px;
+    padding: 7px;
+    border: none;
+}
+
+.start-90-percent {
+    position: absolute;
+    right: 10%; /* Здесь устанавливаем нужное значение в процентах */
+}
+
+.small-text {
+    font-size: 0.5em; /* Устанавливаем размер шрифта в относительных единицах (em) */
+}
+
+.btn-personal {
+    background-color: rgba(255,255,255, 0.5);
+    border: none;
+}
+
+.submit-no-border {
+    border: none;
+}
+
+
+.btn-train_progress_start {
+    background-color: rgba(255,255,255, 0.5);
+}
+
+.plan-assign-inline-button {
+    display: inline block;
+}
+
+#languageSelect {
+    width: 300px; /* Увеличьте ширину, если необходимо */
+    height: 70px; /* Увеличьте высоту, если необходимо */
+}
+
+.localiz-custom-badge {
+    display: inline-block;
+    background: #708090;
+    color: white;
+    text-decoration: none;
+    border-color: white;
+    border-radius: 6px;
+    margin: 1px;
+    padding: 1px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.btn-next-exercise {
+    padding: 8px;
+    background-color: rgba(255,255,255, 0.5);
+    border: none;
+}

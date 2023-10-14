@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}
+Старье
+{% endblock %}
+
+{% block body %}
+    {% if current_user.role == admin %}
+        <div class="m-2">
+            <div class="mb-2"><a href="/index">Главная</a></div>
+
+            <div class="row fs-5 fw-semibold">
+                    <div class="col">Дата</div>
+                    <div class="col">Пользователь</div>
+                    <div class="col">Тренировка</div>
+                    <div class="col"></div>
+                </div>
+            <hr>
+            {% for data in train_data %}
+                <div class="row">
+                    <div class="col">{{ data.date}}</div>
+                    <div class="col">{{ data.user.name}}</div>
+                    <div class="col">{{ data.train.name}}</div>
+                    <div class="col"><a href="/del_old_train/{{data.train.training_id}}" class="link-danger">Удалить</a></div>
+                </div>
+            {% endfor %}
+
+        </div>
+    {% endif %}
+{% endblock %}

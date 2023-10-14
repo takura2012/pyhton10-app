@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block title %}
+{{local_dict['Edit'][current_user.language]}}
+{% endblock %}
+
+{% block body %}
+
+{% include "/modals/flash_mess.html" %}
+
+<!-- Раздел Имя тренировки -->
+        <div class="row mt-3">
+            <div class="col-8">
+                <h3>{{train_local_name}}</h3>
+            </div>
+
+
+            <div class="col-4">
+                <a href="/new_train" class="mx-3 link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                    {{local_dict['Back'][current_user.language]}}
+                </a>
+                {% if train.owner == current_user.name or current_user.role == "admin" %}
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#rename_train" class="mx-3 link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                        {{local_dict['Rename'][current_user.language]}}
+                    </a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#delete_train" class="mx-3 link-danger link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                        {{local_dict['Delete'][current_user.language]}}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if current_user.role == 'admin' %}
+        <form action="/save_train_localization" method="post">
+            <div class="">
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#localization_collapse" role="button" aria-expanded="false" aria-controls="localization_collapse">
+                    Открыть локализацию
+                  </a>
+
+
+                <div class="collapse" id="localization_collapse">
+                  <div class="">
+                    {% for language in languages %}
+                      <div class="d-flex">
+                          <span class="me-3"><img src="/static/flags/{{language}}.png" alt=""></span>
+                          <input type="text" class="form-control" name="train_{{language}}" placeholder="{{language}}" value="{{train_local_names[language]}}">
+                          <input type="hidden" name="train_id" value="{{train_id}}">
+                        </div>
+                    {% endfor %}
+                  </div>
+                    <button type="submit" class="btn btn-success">Сохранить данные локализации</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+<hr>
+
+<!-- Раздел Упражнения -->
+<section >
+{% if te_info_list %}
+
+    <div class="row mb-1 ">
+                <div class="col-6 fs-4">
+                    <b>{{local_dict['Exercise'][current_user.language]}}</b>
+                </div>
+                <div class="col-3 fs-4">
+                    <b>{{local_dict['Sets'][current_user.language]}}</b>
+                </div>
+                <div class="col-3">
+                </div>
+    </div>
+
+    <div class="row mb-1">
+        {% for te_info in te_info_list %}
+                <div class="col-6 fs-4">
+                    {{te_info[3][current_user.language]}}
+                </div>
+                <div class="col-4 fs-4">
+                    {{te_info[1]}}x{{te_info[2]}} ({{te_info[0].time_per_set*te_info[1]}} {{local_dict['minutes'][current_user.language]}}.)
+                </div>
+                <div class="col-2">
+                    {% if train.owner == current_user.name or current_user.role == "admin" %}
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDelete{{ te_info[0].exercise_id }}">
+                        {{local_dict['Edit'][current_user.language]}}
+                    </button>
+                    <form action="/edit_exercise_in_train/{{train.training_id}}" method="post">
+                        {% include "/modals/modal_del_exercise_from_train.html" %}
+                    </form>
+                    {% endif %}
+                </div>
+        {% endfor %}
+                <div class="col-6 fs-4">
+                </div>
+                <div class="col-4 fs-4">
+                   {{local_dict['total_time'][current_user.language]}}:  {{total_time}} {{local_dict['minutes'][current_user.language]}}.
+                </div>
+                <div class="col-2">
+                </div>
+
+    </div>
+
+{% else %} <h4>{{local_dict['No_exercises_in_train'][current_user.language]}}</h4>
+{% endif %}
+</section>
+<hr>
+{% if train.owner == current_user.name or current_user.role == "admin" %}
+    <!-- Раздел Фильтры -->
+    <form action="/get_exercise_filter_list" method="post">
+
+        <div class="row mb-0">
+            <div class="col-2">
+                <b>{{local_dict['Exercises_filters'][current_user.language]}}:</b>
+            </div>
+            <div class="col-2">
+
+                <div class="container-fluid">
+                <select name="select_target" id="select_target" class="form-select form-select-md mb-3 me-2" aria-label=".form-select-md example">>
+                    {% for num in range(config_filter_targets|length) %}
+                        <option value="{{num-1}}" {% if target_filter|int+1 == num %} selected {% endif %}>{{loc_config_targets[current_user.language][num]}}
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            <div class="col-2">
+                <input type="submit" class="btn btn-primary" value="{{local_dict['Apply filters'][current_user.language]}}">
+                <input type="hidden" name="train_id" value="{{train_id}}">
+
+            </div>
+            <div class="col-7">
+
+            </div>
+        </div>
+        <hr>
+        <div class="row mb-2">
+                    {% for i in range(config_filters|length) %}
+            <div class="col-2">
+                        {% for key, filter in config_filters[i].items() %}
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="filters{{i+1}}" value="{{key}}" id="chk_{{key}}" {% if key in exercise_filter_list[i]  %} checked {% endif %}>
+                                <label class="form-check-label" for="chk_{{key}}">
+                                   {{filter}}
+                                </label>
+                            </div>
+
+
+                        {% endfor %}
+            </div>
+                    {% endfor %}
+
+        </div>
+    </form>
+
+    <!-- Раздел Добавление -->
+    <form action="/train_add_ex" method="post">
+            <input type="hidden" name="train_id_hidden" value="{{train.training_id}}">
+            <select name="select_exercise" id="select_exercise" class="form-select form-select-md mb-3 me-2" aria-label=".form-select-md example">>
+                    {% for ex in exercises %}
+                        <option value="{{ex.exercise_id}}">{{exercise_localization_names[loop.index-1][current_user.language]}}
+                    {% endfor %}
+            </select>
+
+                <div class="row mb-2">
+                <div class="col-3">
+                    {{local_dict['Sets'][current_user.language]}} <br>
+                    <input type="number" name="sets" id="sets" class="form-control mb-2" required>
+                </div>
+                <div class="col-3">
+                    {{local_dict['Repetitions'][current_user.language]}} <br>
+                    <input type="number" name="reps" id="reps" class="form-control mb-2" required><br>
+                </div>
+                <div class="col-3">
+                    <br>
+                    <input type="submit" id="" class="btn btn-success" value="{{local_dict['Add_exercise'][current_user.language]}}">
+                    <input type="hidden" name="exercise_filter_list_input" id="exercise_filter_list_input" value={{exercise_filter_list_json}}>
+                    <input type="hidden" name="target_filter" value="{{target_filter}}">
+                </div>
+                </div>
+    </form>
+
+    <!-- Раздел Модал переименование -->
+    <form action="/train_rename" method="post">
+        {% include "/modals/modal_rename_train.html" %}
+    </form>
+
+    <form action="/train_delete" method="post">
+    {% include "/modals/modal_del_training.html" %}
+    </form>
+{% endif %}
+
+{% if current_user.role != "admin" %}
+    {% if train.owner != current_user.name %}
+        <span class="text-primary">{{local_dict['Unable_edit'][current_user.language]}}</span>
+    {% endif %}
+{% endif %}
+
+
+{% endblock %}
+
+

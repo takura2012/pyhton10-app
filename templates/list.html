@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}
+Список
+{% endblock %}
+
+{% block body %}
+        <div class="">
+            <a href="/index" class="me-4">Главная</a>
+            <a href="/create_exercises">Создать новое</a>
+            <hr>
+        </div>
+    {% if current_user.role == "admin" %}
+        <form method="post">
+            <div class="row mb-0 text-left">
+                <div class="col-6 themed-grid-col">
+                    <h5>Таблица: Упражнения</h5>
+                    {% for ex in exercises %}
+                        <div class="row mb-1">
+                            <div class="col-8">
+                                {{ex.counter}}. {{ex.name}}
+                            </div>
+                            <div class="col-4">
+                                <a href="/list/ex{{ex.counter}}/edit" class="btn btn-outline-primary btn-sm">Редактировать</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+                <div class="col-6 themed-grid-col">
+                    <h5>Таблица: Мышцы</h5>
+                    {% for mus in muscles %}
+                        <div class="row mb-1">
+                            <div class="col-8">
+                                {{mus.counter}}. {{mus.muscle_name}}
+                            </div>
+                            <div class="col-4">
+                                <a href="/list/mu{{mus.muscle_id}}/edit" class="btn btn-outline-primary btn-sm">Редактировать</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </form>
+
+    {% endif %}
+
+{% endblock %}

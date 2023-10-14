@@ -1,0 +1,15 @@
+{% with messages = get_flashed_messages() %}
+        {% if messages %}
+
+                {% for message in messages %}
+                    <div class="d-flex m-3 p-2 fs-5 custom-flash-warning rounded-3">
+
+                        <div class="me-3 flex-grow-1" >{{ message }}</div>
+                        <div class="">
+                            <button type="button" class="btn-close" aria-label="Close" id="flash_close_btn"></button>
+                        </div>
+                    </div>
+                {% endfor %}
+
+        {% endif %}
+{% endwith %}

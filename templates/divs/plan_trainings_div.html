@@ -1,0 +1,14 @@
+<hr>
+<div class="row fw-semibold">
+  <div class="col-8">
+    {{local_dict['Workout view'][current_user.language]}}
+  </div>
+</div>
+
+{% for item in response %}
+<div class="row">
+  <div class="col-7">{{item[0]}}</div>
+  <div class="col">{{item[1]}}x{{item[2]}}</div>
+</div>
+
+{% endfor %}

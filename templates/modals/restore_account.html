@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}
+{{local_dict['Restore'][default_language]}}
+
+{% endblock %}
+
+{% block body %}
+
+<div class="text-center">
+    {% include "/modals/flash_mess.html" %}
+</div>
+<form method="post">
+    <div class="d-flex justify-content-center align-items-center vh-100">
+            <div class="m-0 text-center">
+                <span>{{local_dict['Reset_password'][default_language]}}</span>
+                <input type="text" name="restore_email" class="form-control mb-3" placeholder="{{local_dict['E-mail'][default_language]}}">
+                <div class="d-flex justify-content-center">
+                    <div class=""><input type="submit" class="btn btn-success me-3" value="{{local_dict['Restore'][default_language]}}"></div>
+                    <div class=""><a href="/index">{{local_dict['Back'][default_language]}}</a></div>
+                </div>
+
+            </div>
+    </div>
+</form>
+
+{% endblock %}

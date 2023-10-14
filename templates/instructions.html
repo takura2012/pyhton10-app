@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}
+Инструкции
+{% endblock %}
+
+{% block body %}
+
+<div class="account-block pt-3">
+    <div class="text-center">
+
+        {% if current_user.is_anonymous %}
+            <div class="text-center">
+                <h4>{{local_dict['What_is_it'][default_language]}}?</h4>
+                <h5>({{local_dict['video_instruction'][default_language]}})</h5>
+            </div>
+        {% else %}
+            <div class="text-center">
+                <h4>{{local_dict['What_is_it'][current_user.language]}}?</h4>
+                <h5>({{local_dict['video_instruction'][current_user.language]}})</h5>
+            </div>
+        {% endif %}
+
+        <iframe class="mb-5" src="{{youtube_link}}" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    </div>
+
+    <div class="account-item fs-5 m-0 p-0 text-truncate">
+         <a href="/" class="str-link link-underline link-underline-opacity-0 p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
+              <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z"/>
+            </svg>
+            {% if current_user.is_anonymous %}
+                {{local_dict['Main'][default_language]}}
+             {% else %}
+                {{local_dict['Main'][current_user.language]}}
+             {% endif %}
+         </a>
+    </div>
+</div>
+{% endblock %}

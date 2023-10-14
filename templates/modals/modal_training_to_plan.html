@@ -1,0 +1,27 @@
+<div class="modal fade" id="modal_training_to_plan{{train.training_id}}" tabindex="-1" aria-labelledby="modal_training_to_planLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal_training_to_planlanLabel">{{train.name}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body alert alert-secondary">
+
+                {% for ex in train.exercises %}
+                    {{loop.index}}.
+                    {% for training_exercise in ex.training_exercises %}
+                        {% if training_exercise.training_id == train.training_id %}
+                            {{ex.name}} {{training_exercise.sets}}x{{training_exercise.repetitions}} <br>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                <input type="hidden" id="train_id_hidden" name="train_id_hidden" value="{{train.training_id}}">
+                <input type="hidden" id="plan_id_hidden" name="plan_id_hidden" value="{{plan.id}}">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-success">Добавить в план</button>
+            </div>
+        </div>
+    </div>
+</div>
