@@ -141,7 +141,7 @@ def register():
 def index():
     languages = config.LANGUAGES
     default_language = 'EN'
-    browser_lang = request.headers.get('Accept-Language')
+    browser_lang = request.headers.get('Accept-Language', 'EN')
 
     langs = browser_lang.split(';')
     for lang in langs:
@@ -1597,7 +1597,7 @@ def localization_load_phrase(key):
 def instructions():
     languages = config.LANGUAGES
     default_language = 'EN'
-    browser_lang = request.headers.get('Accept-Language')
+    browser_lang = request.headers.get('Accept-Language', 'EN')
     user_admin = User.query.filter_by(name='admin').first()
     user_prefs = json.loads(user_admin.preferences)
     youtube_link = user_prefs['youtube_link']
