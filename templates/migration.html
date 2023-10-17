@@ -33,11 +33,7 @@
                 <form action="/set_admin_prefs" method="post">
                     <div class="">
                         <input type="text" name="youtube_link" class="form-control" value="{{prefs.youtube_link}}">
-                        <input type="text" name="SMTP_SERVER" class="form-control" placeholder="SMTP_SERVER" value="{{prefs.SMTP_SERVER}}">
-                        <input type="text" name="SMTP_PORT" class="form-control" placeholder="SMTP_PORT" value="{{prefs.SMTP_PORT}}">
-                        <input type="text" name="SMTP_USERNAME" class="form-control" placeholder="SMTP_USERNAME" value="{{prefs.SMTP_USERNAME}}">
-                        <input type="text" name="SMTP_PASSWORD" class="form-control" placeholder="SMTP_PASSWORD" value="{{prefs.SMTP_PASSWORD}}">
-                        <input type="text" name="SECRET_KEY" class="form-control" placeholder="SECRET_KEY" value="{{prefs.SECRET_KEY}}">
+                        <input type="text" name="smtp2go_api_key" class="form-control" placeholder="SECRET_KEY" value="{{prefs.smtp2go_api_key}}">
 
                     </div>
                     <input type="submit" class="btn btn-success" value="Сохранить">
@@ -71,6 +67,7 @@
     {% else %}
         <h1>Здесь ничего нет</h1>
     {% endif %}
+
 
 {% endblock %}
 

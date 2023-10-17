@@ -1,3 +1,7 @@
+from __future__ import print_function
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+
 import random, config, re
 import string
 import json
@@ -353,89 +357,6 @@ def is_valid_email(email):
         return False
 
 
-def send_email(target_email, new_password, user_name, send_type = 'recovery'):
-    localizations = Localization.query.all()
-    default_language = session.get('default_language', 'EN')
-    dict = {}
-    for localization in localizations:
-        key = localization.key
-        translations = json.loads(localization.translations)
-        dict[key] = translations[default_language]
-
-    user_admin = User.query.filter_by(name='admin').first()
-    prefs = json.loads(user_admin.preferences)
-
-    # Настройки SMTP сервера Gmail
-    smtp_server = prefs['SMTP_SERVER']
-    smtp_port = prefs['SMTP_PORT']
-    smtp_username = prefs['SMTP_USERNAME']
-    smtp_password = prefs['SMTP_PASSWORD']
-
-    # Адрес отправителя и получателя
-    sender_email = 'fitness-app@volia.com'
-    recipient_email = target_email
-
-    # Создание объекта MIMEMultipart
-    message = MIMEMultipart()
-    message['From'] = sender_email
-    message['To'] = recipient_email
-    message['Subject'] = f"{dict['temporary_password']}"
-
-    # Текст письма
-    message_text = ''
-    if send_type == 'recovery':
-        message_html = f"""/
-        <html>
-            <head>
-            </head>
-            <body style="background-color: #FAFAD2;">
-            <div>
-                <p>{dict['Hello']}, {user_name}!</p>
-                <p>{dict['mail_recovery_requested']}<p>
-                <p>{dict['Your_new_password']} <strong>{new_password}</strong></p>
-                <p>{dict['Dont_forget']}!</p>
-                <br>
-                <br>
-                <p><i>{dict['Best_regards']} FitApp</i></p>
-            </div>
-            </body>
-        </html>
-        """
-    else:
-        message_html = f"""/
-                <html>
-                    <head>
-                    </head>
-                    <body style="background-color: #FAFAD2;">
-                    <div>
-                        <p>{dict['Hello']}, {user_name}!</p>
-                        <p>{dict['applied_registration']}<p>
-                        <p>{dict['Your_new_password']} <strong>{new_password}</strong></p>
-                        <p>{dict['Dont_forget']}!</p>
-                        <br>
-                        <br>
-                        <p><i>{dict['Best_regards']} FitApp</i></p>
-                    </div>
-                    </body>
-                </html>
-                """
-
-    textPart = MIMEText(message_text, 'plain')
-    htmlPart = MIMEText(message_html, 'html')
-    message.attach(textPart)
-    message.attach(htmlPart)
-
-    # Подключение к серверу SMTP
-    with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.starttls()  # Включение TLS (шифрование)
-        server.login(smtp_username, smtp_password)
-
-        # Отправка письма
-        server.sendmail(sender_email, recipient_email, message.as_string())
-
-    return None
-
-
 def generate_random_password(length=6):
     # Определите символы, из которых будет создаваться пароль
     characters = string.ascii_letters + string.digits  # латинские буквы и цифры
@@ -444,6 +365,7 @@ def generate_random_password(length=6):
     password = ''.join(random.choice(characters) for _ in range(length))
 
     return password
+
 
 def load_localization_dict():
 
@@ -483,3 +405,133 @@ def local_flash(key):
     flash(local_flash_message[default_language])
 
     return None
+
+
+def send_api_email():
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key[
+        'api-key'] = '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'
+
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+    # тема письма
+    subject = "Запрос о возобновлении или регистрации"
+    # отправитель в заголовке письма
+    sender = {"name": "Fit-App", "email": "noreply@y.com"}
+    # отправитель внутри письма
+    replyTo = {"name": "Fit-App", "email": "noreply@y.com"}
+    # содержимое
+    html_content = f"""
+            <html>
+                <head>
+                </head>
+                <body style="background-color: #FAFAD2;">
+                <div>
+                    <p>Hello, user_name!</p>
+                    <p>mail_recovery_requested<p>
+                    <p>Your_new_password: <strong>new_password</strong></p>
+                    <p>Dont_forget to change it in your account settings</p>
+                    <p><a href='teroshynvitaly.pythonanywhere.com'>Go to application</a></p>
+                    <br>
+                    <br>
+                    <p><i>Best_regards FitApp</i></p>
+                </div>
+                </body>
+            </html>
+            """
+
+    # кому
+    to = [{"email": "takura2012@online.ua", "name": "User Name"}]
+    params = {"parameter": "My param value", "subject": "New Subject"}
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, reply_to=replyTo,
+                                                   html_content=html_content, sender=sender, subject=subject)
+
+    try:
+        api_response = api_instance.send_transac_email(send_smtp_email)
+        print(api_response)
+        return True
+    except ApiException as e:
+        print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
+        return False
+
+
+def send_api_email_smtp2go(target_email, new_password, user_name, send_type='recovery'):
+    # Создание объекта MIMEMultipart
+
+    localizations = Localization.query.all()
+    default_language = session.get('default_language', 'EN')
+    dict = {}
+
+    if send_type == 'recovery':
+        user = User.query.filter_by(email=target_email).first()
+        default_language = user.language
+
+    for localization in localizations:
+        key = localization.key
+        translations = json.loads(localization.translations)
+        dict[key] = translations[default_language]
+
+    user_admin = User.query.filter_by(name='admin').first()
+    prefs = json.loads(user_admin.preferences)
+
+
+    smtp2go_api_key = prefs['smtp2go_api_key']
+
+    if send_type == 'recovery':
+        html_content = f"""/
+           <html>
+               <head>
+               </head>
+               <body style="background-color: #FAFAD2;">
+               <div>
+                   <p>{dict['Hello']}, {user_name}!</p>
+                   <p>{dict['mail_recovery_requested']}<p>
+                   <p>{dict['Your_new_password']} <strong>{new_password}</strong></p>
+                   <p>{dict['Dont_forget']}!</p>
+                   <br>
+                   <br>
+                   <p><i>{dict['Best_regards']} FitApp</i></p>
+               </div>
+               </body>
+           </html>
+           """
+    else:
+        html_content = f"""/
+                   <html>
+                       <head>
+                       </head>
+                       <body style="background-color: #FAFAD2;">
+                       <div>
+                           <p>{dict['Hello']}, {user_name}!</p>
+                           <p>{dict['applied_registration']}<p>
+                           <p>{dict['Your_new_password']} <strong>{new_password}</strong></p>
+                           <p>{dict['Dont_forget']}!</p>
+                           <br>
+                           <br>
+                           <p><i>{dict['Best_regards']} FitApp</i></p>
+                       </div>
+                       </body>
+                   </html>
+                   """
+    subject = f"{dict['temporary_password']}"
+    email_data = {
+                  "api_key": smtp2go_api_key,
+                  "sender": "takura2012@ukr.net",
+                  "to": [
+                    target_email
+                  ],
+                  "subject": subject,
+                  "html_body": html_content,
+                  "text_body": "Password recovery text body letter"
+                }
+
+    response = requests.post("https://api.smtp2go.com/v3/email/send", json=email_data)
+
+    if response.status_code == 200:
+        result = "OK"
+    else:
+        a1 = "An error raised:"
+        a2 = response.status_code
+        a3 = response.text
+        result = f'{a1}<br>{a2}<br>{a3}'
+
+    return result

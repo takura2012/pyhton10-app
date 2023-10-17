@@ -102,6 +102,7 @@ def register():
             return redirect('register')
 
         password = generate_random_password(8)
+        print(password)
         hashed_password = generate_password_hash(password)
         email = request.form['email']
 
@@ -112,16 +113,17 @@ def register():
 
             date_registration = datetime.utcnow()
             date_last_activity = date_registration
-            LTO = int(request.form.get('LTO', '0'))
+            LTO = int(request.form.get('user_time_offset', '0'))
             preferences = json.dumps({'follow': True, 'LTO': LTO})
             user = User(name=username, password=hashed_password, email=email, preferences=preferences,
                         language=default_language, date_registration=date_registration, date_last_activity=date_last_activity)
             db.session.add(user)
             try:
                 db.session.commit()
-                send_email(email, password, username, 'registration')
+                send_api_email_smtp2go(email, password, username, 'registration')
                 local_flash('success_register')
             except:
+                db.session.rollback()
                 local_flash('Base_error')
                 return redirect(url_for('register'))
         else:
@@ -996,16 +998,10 @@ def del_train_from_plan(plan_trainings_id):
 @app.route('/migration')
 @login_required
 def migration():
-
     if current_user.role == 'admin':
         user_admin = User.query.filter_by(name='admin').first()
 
         prefs = json.loads(user_admin.preferences)
-        youtube_link = prefs.get('youtube_link','')
-        smtp_server = prefs['SMTP_SERVER']
-        smtp_port = prefs['SMTP_PORT']
-        smtp_username = prefs['SMTP_USERNAME']
-        smtp_password = prefs['SMTP_PASSWORD']
 
     return render_template('migration.html', prefs=prefs)
 
@@ -1035,22 +1031,16 @@ def migration_new():
 @app.route('/set_admin_prefs', methods=['GET', 'POST'])
 @login_required
 def set_admin_prefs():
+    user = User.query.filter_by(name='admin').first()
+    user_prefs = json.loads(user.preferences)
+
     youtube_link = request.form.get('youtube_link', '')
-    SMTP_SERVER = request.form.get('SMTP_SERVER', '')
-    SMTP_PORT = request.form.get('SMTP_PORT', '')
-    SMTP_USERNAME = request.form.get('SMTP_USERNAME', '')
-    SMTP_PASSWORD = request.form.get('SMTP_PASSWORD', '')
-    SECRET_KEY = request.form.get('SECRET_KEY', '')
+    smtp2go_api_key = request.form.get('smtp2go_api_key', '')
 
-    user_prefs = json.loads(current_user.preferences)
     user_prefs['youtube_link'] = youtube_link
-    user_prefs['SMTP_SERVER'] = SMTP_SERVER
-    user_prefs['SMTP_PORT'] = SMTP_PORT
-    user_prefs['SMTP_USERNAME'] = SMTP_USERNAME
-    user_prefs['SMTP_PASSWORD'] = SMTP_PASSWORD
-    user_prefs['SECRET_KEY'] = SECRET_KEY
+    user_prefs['smtp2go_api_key'] = smtp2go_api_key
 
-    current_user.preferences = json.dumps(user_prefs)
+    user.preferences = json.dumps(user_prefs)
 
     try:
         db.session.commit()
@@ -1482,7 +1472,6 @@ def restore_account():
             local_flash('invalid_email')
         else:
             # flash('Сообщение с восстановлением выслано')
-            local_flash('recovery_mail_sended')
             user = User.query.filter_by(email=restore_email).first()
             if user:
                 new_password = generate_random_password(8)
@@ -1490,10 +1479,13 @@ def restore_account():
                 user.password = hashed_password
                 try:
                     db.session.commit()
+                    send_api_email_smtp2go(restore_email, new_password, user.name)
+                    local_flash('recovery_mail_sended')
                 except:
+                    db.session.rollback()
                     # flash('Произошла ошибка при восстановлении пароля')
                     local_flash('Base_error')
-                send_email(restore_email, new_password, user.name)
+
             return redirect('user_login')
 
     return render_template('/modals/restore_account.html', default_language=default_language)
@@ -1679,6 +1671,7 @@ def user_details(user_id):
     print(sorted_user_trainings)
 
     return render_template('user_details.html', user=user, prefs=prefs, sorted_user_trainings=sorted_user_trainings)
+
 
 # -------------------------------------------------------------------------------------
 if __name__ == '__main__':
