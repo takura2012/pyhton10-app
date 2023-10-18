@@ -4,8 +4,14 @@
 {% endblock %}
 
 {% block body %}
+<script src="{{ url_for('static', filename='js/local_time.js') }}"></script>
 
-<div class="account-block pt-3 px-2">
+<input type="hidden" id="workout-duration" name="workout_duration" value="{{ workout_duration }}">
+
+<div class="account-block pt-3 px-2" style="height: 100%;">
+
+
+
 
     <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
       <div class="progress-bar" style="width: {{progress_percent}}%"></div>
@@ -79,7 +85,7 @@
                 <div class="col rounded-0 p-2 btn-train_progress_start text-center">
                     <form action="/train_progress_skip" id="tps_form" method="post">
 
-                            <a href="#" class="link-danger link-offset-1" onclick="document.getElementById('tps_form').submit(); return false;">
+                            <a href="#" class="link-danger link-offset-1" onclick="submitForm(); return false;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16">
                                   <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
                                 </svg>
@@ -92,6 +98,13 @@
                     </form>
                     </div>
             </div>
+
+
+    <div class="row" style="position: absolute; bottom:0; width: 100%; background: rgba(255, 255, 255, 0.7)">
+        <div class="col fs-4 fw-semibold" id="workout_duration"></div>
+        <div class="col-6 text-end" id="localTime"></div>
+    </div>
+
 </div>
 
 

@@ -1,7 +1,7 @@
 from __future__ import print_function
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
-
+from datetime import timedelta
 import random, config, re
 import string
 import json
@@ -10,7 +10,7 @@ import requests
 from flask import request, flash, session
 from flask_login import current_user
 
-from _models import Exercise, Muscle, Training, ExerciseMuscle, TrainingExercise,\
+from _models import Exercise, Muscle, Training, ExerciseMuscle, TrainingExercise, \
     Plan, UserTraining, UserTrainingExercise, Plan_Trainings, User, Localization
 from typing import List
 from sqlalchemy import or_, desc
@@ -68,7 +68,8 @@ def create_exercises_set(exercises: List[Exercise], max_effort):
     return final
 
 
-def select_exercises(target_list=['Ноги'], efforts=90, excluded=[], filters=[['1'], ['2'], ['3'], ['4'], ['5'], ['6'], ['7'],[8], [9]]):
+def select_exercises(target_list=['Ноги'], efforts=90, excluded=[],
+                     filters=[['1'], ['2'], ['3'], ['4'], ['5'], ['6'], ['7'], [8], [9]]):
     selected_exercises = []
 
     for target in target_list:
@@ -80,7 +81,7 @@ def select_exercises(target_list=['Ноги'], efforts=90, excluded=[], filters=
 
         # print(f'filters: {filters}')
         # for ex in target_exercises:
-            # print(f'{ex.name}: {ex.filters}')
+        # print(f'{ex.name}: {ex.filters}')
 
         exercises = [ex for ex in target_exercises if ex.exercise_id not in excluded]
 
@@ -106,11 +107,10 @@ def select_exercises(target_list=['Ноги'], efforts=90, excluded=[], filters=
 #     return group_json
 
 
-def get_training_connections(train_id):   # te_info = [te, sets, repetitions] (te- Exercise)
+def get_training_connections(train_id):  # te_info = [te, sets, repetitions] (te- Exercise)
 
     train = Training.query.get(train_id)
     te_info_list = []
-
 
     for te in train.exercises:  # для каждого упражнения te из цикла по training.exercises (класса Training)
         training_exercise = TrainingExercise.query.filter_by(training_id=train.training_id,
@@ -174,13 +174,14 @@ def assign_plan_to_user(user, plan_id):
         train = Training.query.get(user_training.training_id)
         exercises = train.exercises
         for exercise in exercises:
-            training_exercise = TrainingExercise.query.filter_by(training_id=train.training_id, exercise_id=exercise.exercise_id).first()
+            training_exercise = TrainingExercise.query.filter_by(training_id=train.training_id,
+                                                                 exercise_id=exercise.exercise_id).first()
             user_train_exercise = UserTrainingExercise(user_training_id=user_training.id,
-                                                        exercise_id=exercise.exercise_id,
-                                                        sets=training_exercise.sets,
-                                                        repetitions = training_exercise.repetitions,
-                                                        weight = 0
-                                                        )
+                                                       exercise_id=exercise.exercise_id,
+                                                       sets=training_exercise.sets,
+                                                       repetitions=training_exercise.repetitions,
+                                                       weight=0
+                                                       )
             user_train_exercises.append(user_train_exercise)
 
         db.session.add_all(user_train_exercises)
@@ -191,15 +192,14 @@ def assign_plan_to_user(user, plan_id):
             db.session.rollback()
             return e
 
-
     return True
 
 
 def del_current_user_plan(user):
-
     user_trainings = UserTraining.query.filter_by(user_id=user.id, assigned=True, completed=False).all()
     user_trainings_ids = [ut.id for ut in user_trainings]
-    user_training_exercises = UserTrainingExercise.query.filter(UserTrainingExercise.user_training_id.in_(user_trainings_ids)).all()
+    user_training_exercises = UserTrainingExercise.query.filter(
+        UserTrainingExercise.user_training_id.in_(user_trainings_ids)).all()
     for user_training_exercise in user_training_exercises:
         db.session.delete(user_training_exercise)
     for user_training in user_trainings:
@@ -215,14 +215,12 @@ def del_current_user_plan(user):
 
 
 def get_user_trains(user):
-
     trains = UserTraining.query.filter_by(user_id=user.id).all()
 
     return trains
 
 
 def get_user_assigned_train(user):
-
     user_training = UserTraining.query.filter_by(user_id=user.id, assigned=True, completed=False).first()
     if not user_training:
         return None
@@ -246,7 +244,8 @@ def set_train_complete(user_id, train_id):
             print(e)
             return e
 
-        user_training_exercises = UserTrainingExercise.query.filter_by(user_training_id=user_training.id, completed=False).all()
+        user_training_exercises = UserTrainingExercise.query.filter_by(user_training_id=user_training.id,
+                                                                       completed=False).all()
         if not user_training_exercises:
             return 'Не найдена связь user_training_exercises'
 
@@ -260,12 +259,10 @@ def set_train_complete(user_id, train_id):
                 print(e)
                 return e
 
-
     return 'OK'
 
 
 def find_prev_weight(ex_id, user_id):
-
     user_trainings = UserTraining.query.filter_by(user_id=user_id).all()
     ids = [user_training.id for user_training in user_trainings]
     exercise = Exercise.query.get(ex_id)
@@ -299,9 +296,6 @@ def find_max_weight(exercise_id, user_id):
 
 
 def get_exercise_statistics(user_id):
-
-
-
     exercises_struct = {}
     user_trainings = UserTraining.query.filter_by(user_id=user_id, completed=True).all()
 
@@ -317,7 +311,7 @@ def get_exercise_statistics(user_id):
                 exercises_struct[ex_id].append({'date': ex_date, 'weight': ex_weight, 'skipped': ex_skipped})
             except:
                 exercises_struct[ex_id] = []
-                exercises_struct[ex_id].append({'date':ex_date, 'weight': ex_weight, 'skipped': ex_skipped})
+                exercises_struct[ex_id].append({'date': ex_date, 'weight': ex_weight, 'skipped': ex_skipped})
 
     struc = []
     for ex_id, unsorted_data in exercises_struct.items():
@@ -368,19 +362,16 @@ def generate_random_password(length=6):
 
 
 def load_localization_dict():
-
     phrases = Localization.query.all()
     phrases_list = {}
     for phrase in phrases:
         translations_dict = json.loads(phrase.translations)
         phrases_list[phrase.key] = translations_dict
 
-
     return phrases_list
 
 
 def local_flash(key):
-
     languages = config.LANGUAGES
     default_language = 'EN'
 
@@ -473,7 +464,6 @@ def send_api_email_smtp2go(target_email, new_password, user_name, send_type='rec
     user_admin = User.query.filter_by(name='admin').first()
     prefs = json.loads(user_admin.preferences)
 
-
     smtp2go_api_key = prefs['smtp2go_api_key']
 
     if send_type == 'recovery':
@@ -514,15 +504,15 @@ def send_api_email_smtp2go(target_email, new_password, user_name, send_type='rec
                    """
     subject = f"{dict['temporary_password']}"
     email_data = {
-                  "api_key": smtp2go_api_key,
-                  "sender": "takura2012@ukr.net",
-                  "to": [
-                    target_email
-                  ],
-                  "subject": subject,
-                  "html_body": html_content,
-                  "text_body": "Password recovery text body letter"
-                }
+        "api_key": smtp2go_api_key,
+        "sender": "takura2012@ukr.net",
+        "to": [
+            target_email
+        ],
+        "subject": subject,
+        "html_body": html_content,
+        "text_body": "Password recovery text body letter"
+    }
 
     response = requests.post("https://api.smtp2go.com/v3/email/send", json=email_data)
 
@@ -535,3 +525,16 @@ def send_api_email_smtp2go(target_email, new_password, user_name, send_type='rec
         result = f'{a1}<br>{a2}<br>{a3}'
 
     return result
+
+
+def get_local_time():
+    current_utc_time = datetime.utcnow()
+    user_time = current_utc_time
+    if not current_user.is_anonymous:
+        user_prefs = json.loads(current_user.preferences)
+        time_delta = timedelta(hours=user_prefs['LTO'])
+        user_time = current_utc_time + time_delta
+
+    local_time = user_time.strftime('%H:%M:%S')
+
+    return local_time

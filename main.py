@@ -3,7 +3,7 @@ from flask import Flask, render_template, url_for, request, redirect, session, f
 from flask_sqlalchemy import SQLAlchemy
 from collections import Counter
 import json
-
+from datetime import timedelta
 from sqlalchemy import Column, Integer, String, ForeignKey, and_, or_
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -141,10 +141,10 @@ def register():
 @app.route('/index', methods=['POST', 'GET'])
 @app.route('/', methods=['POST', 'GET'])
 def index():
+
     languages = config.LANGUAGES
     default_language = 'EN'
     browser_lang = request.headers.get('Accept-Language', 'EN')
-
     langs = browser_lang.split(';')
     for lang in langs:
         for defined_lang in languages:
@@ -155,9 +155,9 @@ def index():
             continue
         break
     session['default_language'] = default_language
-
     if not current_user.is_anonymous:
         current_user.date_last_activity = datetime.utcnow()
+
         try:
             db.session.commit()
         except:
@@ -1121,7 +1121,6 @@ def user_complete_train(train_id):
 def train_progress_start():
     user_id = current_user.id
 
-
     if request.method == 'POST':
         train_id = request.form.get('train_id')
 
@@ -1147,6 +1146,10 @@ def train_progress_start():
             local_flash('Base_error')
             return redirect(url_for('current_train'))
 
+    current_time = datetime.utcnow()
+    wd = current_time - user_training.date_started
+    workout_duration = wd.total_seconds()
+
     position = user_training_exercises.index(user_training_exercise)
     ex_count = len(user_training_exercises)
     progress_percent = round(position/ex_count*100)
@@ -1162,7 +1165,8 @@ def train_progress_start():
 
     return render_template('current_exercise.html', exercise=exercise, previous_weight=previous_weight,
                            user_training=user_training, user_training_exercise=user_training_exercise,
-                           max_weight=max_weight, progress_percent=progress_percent, ex_loc_name=ex_loc_name)
+                           max_weight=max_weight, progress_percent=progress_percent, ex_loc_name=ex_loc_name,
+                           workout_duration=workout_duration)
 
 
 @app.route('/train_progress_next', methods=['POST', 'GET'])
