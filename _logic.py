@@ -401,7 +401,7 @@ def local_flash(key):
 def send_api_email():
     configuration = sib_api_v3_sdk.Configuration()
     configuration.api_key[
-        'api-key'] = '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'
+        'api-key'] = ''
 
     api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
     # тема письма
