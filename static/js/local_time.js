@@ -16,13 +16,6 @@ $(document).ready(function() {
     // Вызовите функцию сразу после загрузки страницы
     updateLocalTime();
 
-
-    function submitForm() {
-     document.getElementById('tps_form').submit();
-    }
-
-
-
     let durationInSeconds = document.getElementById('workout-duration').value;
     console.log(durationInSeconds)
     // Вставляем значение workout_duration_seconds из шаблона Flask
@@ -38,10 +31,6 @@ $(document).ready(function() {
         const timerElement = document.getElementById('workout_duration');
         timerElement.textContent = formatTime(durationInSeconds);
         durationInSeconds++;
-    }
-
-    function submitForm() {
-     document.getElementById('tps_form').submit();
     }
 
     setInterval(updateTimer, 1000);

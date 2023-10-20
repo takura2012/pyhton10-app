@@ -12,7 +12,7 @@ from flask_session import Session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user, AnonymousUserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
-import logging
+import logging, warnings
 
 from _models import Exercise, Muscle, ExerciseMuscle, db, User, Plan, TrainingExercise, \
     Training, UserTraining, UserTrainingExercise, Plan_Trainings, Localization
@@ -23,6 +23,7 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO)  # Устанавливаем уровень логгирования (INFO, DEBUG и т. д.)
 logger = logging.getLogger(__name__)
+
 app.config.from_object('config')
 app.config['LOGIN_VIEW'] = 'index'
 
@@ -33,6 +34,7 @@ Session(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'index'
+warnings.filterwarnings('ignore')
 
 # -----------------------------------------------REGISTER---------------------------------
 @login_manager.user_loader
@@ -1289,7 +1291,14 @@ def statistics():
             local_name = local_names[current_user.language]
             # Training, UserTraining.id, количество упражнений, дата завершения
             ex_count=len(train.exercises)
-            formatted_datetime = c_tr.date_completed.strftime("%d-%m-%Y %H:%M")
+
+            user_prefs = json.loads(current_user.preferences)
+            # Создайте объект timedelta для добавления часов
+            time_delta = timedelta(hours=user_prefs['LTO'])
+            # Добавьте timedelta к текущему времени
+            result_time = c_tr.date_completed + time_delta
+
+            formatted_datetime = result_time.strftime("%d-%m-%Y %H:%M")
             completed_trainings.append([train, c_tr.id, ex_count, formatted_datetime, local_name])
     completed_trainings.reverse()
 
@@ -1337,10 +1346,13 @@ def statistic_details(user_training_id):
         dict[key] = translations[current_user.language]
 
     train_note = user_training.train_note
-    unformatted_start_time = user_training.date_started
+
+    user_prefs = json.loads(current_user.preferences)
+    time_delta = timedelta(hours=user_prefs['LTO'])
+    unformatted_start_time = user_training.date_started + time_delta
     start_time = unformatted_start_time.strftime('%d-%m-%y %H:%M')
 
-    unformatted_finish_time = user_training.date_completed
+    unformatted_finish_time = user_training.date_completed + time_delta
     finish_time = unformatted_finish_time.strftime('%d-%m-%y %H:%M')
 
     delta = unformatted_finish_time-unformatted_start_time
@@ -1375,7 +1387,6 @@ def statistics_exercises():
 
         user_id = request.form.get('user_id')
         trains_count = request.form.get('trains_count')
-        include_noweights = True
         exercises_struct = get_exercise_statistics(user_id)
         # [[55, 'Разогрев+ разминка (10 минут)', 4, 1, [{'date': '28-08-2023 10:03:04', 'weight': 0, 'skipped': False},
 
@@ -1655,6 +1666,8 @@ def users_administration():
 
 @app.route('/user_details/<int:user_id>')
 def user_details(user_id):
+    roles = config.ACCOUNT_TYPES
+    languages = config.LANGUAGES
 
     user = User.query.get(user_id)
     prefs = json.loads(user.preferences)
@@ -1672,16 +1685,40 @@ def user_details(user_id):
 
     sorted_user_trainings = sorted(user_trainings_list, key=lambda ut: ut['date_complete'], reverse=True)
 
-    print(sorted_user_trainings)
+    return render_template('user_details.html', user=user, prefs=prefs, sorted_user_trainings=sorted_user_trainings,
+                           roles=roles, languages=languages)
 
-    return render_template('user_details.html', user=user, prefs=prefs, sorted_user_trainings=sorted_user_trainings)
+
+@app.route('/save_user_data', methods = ['POST', 'GET'])
+def save_user_data():
+
+    user_id = request.form.get('user_id')
+    role = request.form.get('role_select')
+    user_email = request.form.get('user_email')
+    language = request.form.get('lang_select')
+    user_LTO = request.form.get('user_LTO')
+
+    user = User.query.get(user_id)
+    user_prefs = json.loads(user.preferences)
+    user.role = role
+    user.email = user_email
+    user.language = language
+    user_prefs['LTO'] = user_LTO
+    user.preferences = json.dumps(user_prefs)
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        local_flash('Base_error')
+
+    return redirect(url_for('user_details', user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------
 if __name__ == '__main__':
 
     # with app.app_context():
-        # local_dict = load_localization_dict()
 
     #     try:
     #         db.create_all()

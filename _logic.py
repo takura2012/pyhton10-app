@@ -304,7 +304,7 @@ def get_exercise_statistics(user_id):
         for user_training_exercise in user_training_exercises:
             ex_id = user_training_exercise.exercise_id
             ex_date_unformat = user_training.date_completed
-            ex_date = ex_date_unformat.strftime("%d-%m-%Y %H:%M:%S")
+            ex_date = ex_date_unformat.strftime("%d-%m-%Y")
             ex_weight = user_training_exercise.weight
             ex_skipped = user_training_exercise.skipped
             try:
@@ -315,7 +315,7 @@ def get_exercise_statistics(user_id):
 
     struc = []
     for ex_id, unsorted_data in exercises_struct.items():
-        data = sorted(unsorted_data, key=lambda x: datetime.strptime(x['date'], '%d-%m-%Y %H:%M:%S'), reverse=True)
+        data = sorted(unsorted_data, key=lambda x: datetime.strptime(x['date'], '%d-%m-%Y'), reverse=True)
         ex = Exercise.query.get(ex_id)
         ex_names = json.loads(ex.localized_name)
         ex_name = ex_names[current_user.language]

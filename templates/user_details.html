@@ -4,61 +4,121 @@
 {% endblock %}
 
 {% block body %}
+
+<div class="text-center">
+        {% include "/modals/flash_mess.html" %}
+    </div>
+
     <div class="mb-2">
         <a href="/" class="me-4">Главная</a>
         <a href="/users_administration" class="me-4">Назад</a>
     </div>
 <hr>
-<div class="">
-    <strong>id:</strong> {{user.id}}
-</div>
-<div class="">
-    <strong>name:</strong> {{user.name}}
-</div>
-<div class="">
-    <strong>role:</strong> {{user.role}}
-</div>
-<div class="">
-    <strong>email:</strong> {{user.email}}
-</div>
-<div class="">
-    <strong>language:</strong> {{user.language}}
-</div>
-<div class="">
-    <strong>registration:</strong> {{user.date_registration}}
-</div>
-<div class="">
-    <strong>activity:</strong> {{user.date_last_activity}}
-</div>
-<div class="">
-    <strong>LTO:</strong> {{prefs.LTO}}
-</div>
-<hr>
-<div class="">
-    <strong>Тренировки пользователя</strong>
-
-    {% for train in sorted_user_trainings %}
-        <div class="row">
-            <div class="col-3">
-                {{train.name}}
-            </div>
-            <div class="col-1">
-                {% if train.complete %}
-                    Completed
-                {% else %}
-                    Assigned
-                {% endif %}
-            </div>
-            <div class="col">
-                {% if train.complete %}
-                    {{train.date_complete}}
-                {% else %}
-                    -
-                {% endif %}
-            </div>
-
+    <form action="/save_user_data" method="post">
+        <div class="">
+            <strong>id:</strong> {{user.id}}
+            <input type="hidden" name="user_id" value="{{user.id}}">
         </div>
-    {% endfor %}
 
-</div>
+        <div class="row">
+            <div class="col-1">
+                <strong>name:</strong>
+            </div>
+            <div class="col-3">
+                <input type="text" name="user_name" class="form-control form-control-sm bg-white-op-50" value="{{user.name}}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-1">
+                <strong>role:</strong>
+            </div>
+            <div class="col-3">
+                <select name="role_select" class="form-select form-select-sm bg-white-op-50" aria-label="Small select example">
+                    {% for key, role in roles.items() %}
+                        <option {% if user.role == key %} selected {% endif %}>{{key}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-1">
+                <strong>email:</strong>
+            </div>
+            <div class="col-3">
+                <input type="text" name="user_email" class="form-control form-control-sm bg-white-op-50" value="{{user.email}}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-1">
+                <strong>language:</strong>
+            </div>
+            <div class="col-3">
+                <select name="lang_select" class="form-select form-select-sm bg-white-op-50" aria-label="Small select example">
+                    {% for lang in languages %}
+                        <option {% if user.language == lang %} selected {% endif %}>{{lang}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-1">
+                <strong>LTO:</strong>
+            </div>
+            <div class="col-3">
+                <input type="number" name="user_LTO" class="form-control form-control-sm bg-white-op-50" value="{{prefs.LTO}}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-1">
+                <strong>registration:</strong>
+            </div>
+            <div class="col-3">
+                {{user.date_registration}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-1">
+                <strong>activity:</strong>
+            </div>
+            <div class="col-3">
+               {{user.date_last_activity}}
+            </div>
+        </div>
+
+        <input type="submit" class="btn btn-sm btn-success mt-2" value="Сохранить">
+
+    </form>
+
+    <hr>
+    <div class="">
+        <strong>Тренировки пользователя</strong>
+
+        {% for train in sorted_user_trainings %}
+            <div class="row">
+                <div class="col-3">
+                    {{train.name}}
+                </div>
+                <div class="col-1">
+                    {% if train.complete %}
+                        Completed
+                    {% else %}
+                        Assigned
+                    {% endif %}
+                </div>
+                <div class="col">
+                    {% if train.complete %}
+                        {{train.date_complete}}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
