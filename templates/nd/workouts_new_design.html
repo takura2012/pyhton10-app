@@ -1,0 +1,54 @@
+{% extends 'nd/nd_base.html' %}
+{% block title %}
+WORKOUTS
+{% endblock %}
+
+{% block body %}
+
+<div class="nd-body">
+
+    <div class="new-design-header d-flex justify-content-between mt-2">
+        <div class="nd-header-menu ms-3">
+            <a href="#" class="stretched" data-bs-toggle="modal" data-bs-target="#nd_modal_workout_menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+            </a>
+        </div>
+        <div class=""></div>
+        <div class="nd-header-menu me-5 fw-semibold">
+            WORKOUTS
+        </div>
+    </div>
+    <div class="mt-3">
+        {% for workout in workouts %}
+            <div class="new-design-workout m-2">
+                <a href="/nd_edit_workout/{{workout.id}}" class="stretched">
+                    <div class="">
+                        {{workout.name}}
+                    </div>
+                    <div class="nd-items-description">Exercises: {{workout.ex_count}}</div>
+                    <div class="nd-items-description">Duration: {{workout.duration}} m.</div>
+                </a>
+
+            </div>
+
+        {% endfor %}
+    </div>
+
+</div>
+
+<form action="/new_train" id="modalCreate" method="post">
+    {% include "/modals/nd_modal_workout_menu.html" %}
+</form>
+
+{% endblock %}
+
+<script>
+        document.getElementById('submitCreate').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('modalCreate').submit();
+        });
+</script>
+
+</html>

@@ -1,0 +1,55 @@
+<!-- Modal -->
+<div class="modal fade " id="nd_modal_ex_filters" tabindex="-1" aria-labelledby="nd_modal_ex_filters_Label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content nd-modal-menu">
+      <div class="modal-header nd-main-color">
+        <h1 class="modal-title fs-5">Exrcises Filters</h1>
+        <a class="nd-main-color" data-bs-dismiss="modal" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          </svg>
+        </a>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex">
+          <div class="nd-items-color me-4">
+            Target:
+          </div>
+          <div class="flex-grow-1">
+              <select name="target_select" class="form-control-sm filter-select nd-items-color">
+                {% for target in filters_target %}
+                  <option value="{{target}}" {% if target == used_target_filter %} selected {% endif %}>{{target}}</option>
+                {% endfor %}
+              </select>
+          </div>
+        </div>
+        <hr class="nd-items-color">
+        <div class="nd-main-color">
+          {% for i in range(filters|length) %}
+              {% for key, filter_item in filters[i].items() %}
+                <div class="">
+                  <input type="checkbox" class="form-check-input" name="filter{{i}}_{{key}}" value="{{key}}" id="chk{{key}}" {% if key in used_filters_list %} checked {% endif %}>
+                  <label class="form-check-label" for="chk{{key}}">
+                      {{filter_item}}
+                  </label>
+                </div>
+              {% endfor %}
+          <hr>
+          {% endfor %}
+
+        </div>
+        <div class="">
+            <a href="#" id="submitFilters" class="btn btn-sm btn-primary">
+                Apply
+            </a>
+        </div>
+
+
+      </div>
+      <div class="modal-footer">
+
+
+      </div>
+    </div>
+  </div>
+</div>

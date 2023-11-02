@@ -1,0 +1,73 @@
+{% extends 'nd/nd_base.html' %}
+{% block title %}
+ADD
+{% endblock %}
+
+{% block body %}
+
+<div class="nd-body">
+
+    <div class="d-flex justify-content-between mt-2">
+<!--        ссылка назад-->
+        <div class="nd-header-menu ms-3 pt-1">
+            <a href="/nd_edit_workout/{{training_id}}" class="stretched ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+            </a>
+        </div>
+<!--        центр заголовка-->
+        <div class="nd-header-menu fw-semibold pt-1">ADD EXERCISE</div>
+        <div class="d-flex me-3">
+            <div class="">
+<!--        воронка фильтры-->
+            </div>
+            <div class="nd-header-menu pt-1">
+                <a href="#" class="stretched" data-bs-toggle="modal" data-bs-target="#nd_modal_ex_filters">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                      <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2h-11z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+<!--    конец заголовка начало тела-->
+    <div class="mt-3">
+        {% for ex in exercises %}
+        <div class="d-flex">
+            <div class="new-design-workout m-2 p-1 w-100">
+                <a href="/nd_add_ex_details/{{training_id}}-{{ex.exercise_id}}" class="stretched">
+                    <div class="">
+                        {{ex.name}}
+                    </div>
+                    <div class="nd-items-description mt-2"></div>
+                    <div class="nd-items-description">{{ex.target}}</div>
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+
+</div>
+
+<form action="/nd_ex_filters" id="ndExFilters" method="post">
+    <input type="hidden" name="training_id" value="{{training_id}}">
+    {% include "/modals/nd_modal_ex_filters.html" %}
+</form>
+
+
+<script>
+        document.getElementById('submitFilters').addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('click')
+            document.getElementById('ndExFilters').submit();
+        });
+</script>
+
+
+{% endblock %}
+
+
+

@@ -1,0 +1,83 @@
+body {
+    background: black;
+    position: relative;
+}
+
+.nd-body {
+    width: 100%;
+    max-width: 700px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.nd-header-menu {
+    color: #DCDCDC;
+}
+
+.new-design-workout {
+    background: rgba(255,255,255, 0.1);
+    color: #DCDCDC;
+    min-height: 80px;
+}
+
+.nd-main-color {
+    color: #DCDCDC;
+}
+
+.nd-items-color {
+    color: #DCDCDC;
+}
+
+.nd-description-color {
+    color: #D3D3D3;
+}
+
+.nd-items-description {
+    color: #D3D3D3;
+    font-size: 0.8em; /* Устанавливаем размер шрифта в относительных единицах (em) */
+}
+
+.stretched {
+    width: 100%;
+    height: 100%;
+    display: block;
+    text-decoration: none; /* Убираем подчеркивание */
+    color: inherit;
+}
+
+.nd-modal-menu {
+     background: #202020;
+}
+
+.nd-nodecoration {
+    text-decoration: none;
+}
+
+.nd-inherit {
+    color: inherit;
+}
+
+.nd_image_exercise {
+    min-height: 80px;
+    min-width: 80px;
+}
+
+.nd_settings_exercise {
+    min-height: 80px;
+    min-width: 40px;
+    background: #191919;
+}
+
+.new-design-add-ex {
+    background: rgba(255,255,255, 0.2);
+    color: #DCDCDC;
+    min-height: 40px;
+    border-radius: 7px;
+
+}
+
+.filter-select {
+    width: 100%;
+    background: #404040;
+}

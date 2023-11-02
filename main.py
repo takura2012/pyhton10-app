@@ -94,6 +94,8 @@ def user_logout():
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     default_language = session.get('default_language', 'EN')
+    config_filters = config.FILTER_LIST
+    user_filters = [[key for key, value in filter.items()] for filter in config_filters]
 
     if request.method == 'POST':
         username = request.form['username']
@@ -116,18 +118,22 @@ def register():
             date_registration = datetime.utcnow()
             date_last_activity = date_registration
             LTO = int(request.form.get('user_time_offset', '0'))
-            preferences = json.dumps({'follow': True, 'LTO': LTO})
+            preferences = json.dumps({'follow': True, 'LTO': LTO, 'user_filters': user_filters})
             user = User(name=username, password=hashed_password, email=email, preferences=preferences,
                         language=default_language, date_registration=date_registration, date_last_activity=date_last_activity)
             db.session.add(user)
-            try:
-                db.session.commit()
-                send_api_email_smtp2go(email, password, username, 'registration')
-                local_flash('success_register')
-            except:
-                db.session.rollback()
-                local_flash('Base_error')
-                return redirect(url_for('register'))
+            res = send_api_email(email, password, username, 'registration')
+            if res.status_code == 200:
+                try:
+                    db.session.commit()
+
+                    local_flash('success_register')
+                except:
+                    db.session.rollback()
+                    local_flash('Base_error')
+                    return redirect(url_for('register'))
+            else:
+                flash('Email not sended')
         else:
             local_flash('Error_existing_user')
             # flash('Пользователь с такими данными уже существует')
@@ -559,10 +565,9 @@ def edit_train(train_id):
         exercise_filter_list = json.loads(exercise_filter_list_str)
     else:
         exercise_filter_list = []
-
     exercise_filter_list_json = ';'.join([','.join(sublist) for sublist in exercise_filter_list])
     target_filter = request.args.get('target_filter', '-1')
-
+    print(exercise_filter_list)
     # Создаем список условий для каждой группы фильтров - хз как оно работате делал чатГПТ. главное работает
     group_conditions = []
     for group in exercise_filter_list:
@@ -576,7 +581,6 @@ def edit_train(train_id):
     filtered_exercises = Exercise.query.filter(combined_condition).all()
 
     # применяем фильтр по группе мышц
-
 
 
     if int(target_filter) >= 0:
@@ -1482,24 +1486,31 @@ def restore_account():
     default_language = session.get('default_language', 'EN')
     if request.method == 'POST':
         restore_email = request.form.get('restore_email')
+
         if not is_valid_email(restore_email):
             # flash('Электронная почта введена некорректно')
             local_flash('invalid_email')
         else:
             # flash('Сообщение с восстановлением выслано')
             user = User.query.filter_by(email=restore_email).first()
+            print(user)
             if user:
                 new_password = generate_random_password(8)
                 hashed_password = generate_password_hash(new_password)
                 user.password = hashed_password
-                try:
-                    db.session.commit()
-                    send_api_email_smtp2go(restore_email, new_password, user.name)
-                    local_flash('recovery_mail_sended')
-                except:
-                    db.session.rollback()
-                    # flash('Произошла ошибка при восстановлении пароля')
-                    local_flash('Base_error')
+
+                res = send_api_email(restore_email, new_password, user.name, 'recovery')
+                if res.status_code == 200:
+                    try:
+                        db.session.commit()
+                        local_flash('recovery_mail_sended')
+                    except:
+                        db.session.rollback()
+                        local_flash('Base_error')
+                else:
+                    flash('Mail not sended')
+
+
 
             return redirect('user_login')
 
@@ -1714,6 +1725,84 @@ def save_user_data():
 
     return redirect(url_for('user_details', user_id=user_id))
 
+
+@app.route('/del_user/<int:user_id>')
+def del_user(user_id):
+    delete_user_data(user_id)
+    return redirect(url_for('users_administration'))
+
+
+# ------------------------------------------DESIGN------------------------------------
+@app.route('/workouts_new_design')
+def workouts_new_design():
+    workouts = Training.query.filter_by(owner=current_user.name).all()
+    formatted_workouts = []
+    for workout in workouts:
+        workout_duration = 0
+        ex_count = len(workout.exercises)
+        for ex in workout.exercises:
+            training_exercise = TrainingExercise.query.filter_by(training_id=workout.training_id, exercise_id=ex.exercise_id).first()
+            ex_time = ex.time_per_set*training_exercise.sets
+            workout_duration += ex_time
+        formatted_workouts.append({'id': workout.training_id, 'name': workout.name, 'ex_count': ex_count, 'duration': workout_duration})
+    return render_template('nd/workouts_new_design.html', workouts=formatted_workouts)
+
+
+@app.route('/nd_edit_workout/<int:training_id>')
+def nd_edit_workout(training_id):
+    training = Training.query.get(training_id)
+    return render_template('nd/nd_edit_workout.html', training=training)
+
+
+@app.route('/nd_add_ex/<int:training_id>')
+def nd_add_ex(training_id):
+    filters = config.FILTER_LIST
+    filters_target = config.FILTER_TARGETS
+
+    user_prefs = json.loads(current_user.preferences)
+    user_filters = user_prefs['user_filters']
+
+    used_filters_json = request.args.get('used_filters_json')
+    used_target_filter = request.args.get('target_filter', 'Все')
+    if used_filters_json:
+        used_filters = json.loads(used_filters_json)
+        user_filters_list = [[key for key, item in filter.items() if item != ''] for filter in used_filters]
+
+        user_prefs['user_filters'] = user_filters_list
+        current_user.preferences = json.dumps(user_prefs)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+    else:
+        user_filters_list = user_filters
+
+
+    used_filters_list = [item for sublist in user_filters_list for item in sublist]
+
+    exercises = nd_filter_exercises(user_filters_list, used_target_filter)
+
+    return render_template('nd/nd_add_ex.html', exercises=exercises, training_id=training_id, filters=filters,
+                           filters_target=filters_target, used_filters_list=used_filters_list, used_target_filter=used_target_filter)
+
+
+@app.route('/nd_ex_filters', methods=['POST', 'GET'])
+def nd_ex_filters():
+    filters = config.FILTER_LIST
+    used_filters = [{key:value for key, value in filter.items()} for filter in filters]
+
+    for i in range(len(filters)):
+        for key, filter in filters[i].items():
+            fkey = request.form.get(f'filter{i}_{key}', '')
+            used_filters[i][key] = filters[i][str(fkey)] if fkey != '' else ''
+
+    used_filters_json = json.dumps(used_filters)
+    training_id = request.form.get('training_id')
+    target_filter = request.form.get('target_select')
+
+    url = url_for('nd_add_ex', training_id=training_id, target_filter=target_filter,
+                  used_filters_json=used_filters_json)
+    return redirect(url)
 
 # -------------------------------------------------------------------------------------
 if __name__ == '__main__':

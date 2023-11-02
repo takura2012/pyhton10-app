@@ -13,8 +13,9 @@ from flask_login import current_user
 from _models import Exercise, Muscle, Training, ExerciseMuscle, TrainingExercise, \
     Plan, UserTraining, UserTrainingExercise, Plan_Trainings, User, Localization
 from typing import List
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, and_, desc
 from main import db
+from mailjet_rest import Client
 
 import smtplib
 from email.mime.text import MIMEText
@@ -398,132 +399,50 @@ def local_flash(key):
     return None
 
 
-def send_api_email():
-    configuration = sib_api_v3_sdk.Configuration()
-    configuration.api_key[
-        'api-key'] = ''
-
-    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-    # тема письма
-    subject = "Запрос о возобновлении или регистрации"
-    # отправитель в заголовке письма
-    sender = {"name": "Fit-App", "email": "noreply@y.com"}
-    # отправитель внутри письма
-    replyTo = {"name": "Fit-App", "email": "noreply@y.com"}
-    # содержимое
-    html_content = f"""
-            <html>
-                <head>
-                </head>
-                <body style="background-color: #FAFAD2;">
-                <div>
-                    <p>Hello, user_name!</p>
-                    <p>mail_recovery_requested<p>
-                    <p>Your_new_password: <strong>new_password</strong></p>
-                    <p>Dont_forget to change it in your account settings</p>
-                    <p><a href='teroshynvitaly.pythonanywhere.com'>Go to application</a></p>
-                    <br>
-                    <br>
-                    <p><i>Best_regards FitApp</i></p>
-                </div>
-                </body>
-            </html>
-            """
-
-    # кому
-    to = [{"email": "takura2012@online.ua", "name": "User Name"}]
-    params = {"parameter": "My param value", "subject": "New Subject"}
-    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, reply_to=replyTo,
-                                                   html_content=html_content, sender=sender, subject=subject)
-
-    try:
-        api_response = api_instance.send_transac_email(send_smtp_email)
-        print(api_response)
-        return True
-    except ApiException as e:
-        print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
-        return False
-
-
-def send_api_email_smtp2go(target_email, new_password, user_name, send_type='recovery'):
-    # Создание объекта MIMEMultipart
-
-    localizations = Localization.query.all()
-    default_language = session.get('default_language', 'EN')
-    dict = {}
-
+def send_api_email(email, password, username, send_type):
+    admin_user = User.query.filter_by(name='admin').first()
+    admin_prefs = json.loads(admin_user.preferences)
+    api_key = admin_prefs['mailjet_api_key']
+    api_secret = admin_prefs['mailjet_api_secret']
     if send_type == 'recovery':
-        user = User.query.filter_by(email=target_email).first()
-        default_language = user.language
-
-    for localization in localizations:
-        key = localization.key
-        translations = json.loads(localization.translations)
-        dict[key] = translations[default_language]
-
-    user_admin = User.query.filter_by(name='admin').first()
-    prefs = json.loads(user_admin.preferences)
-
-    smtp2go_api_key = prefs['smtp2go_api_key']
-
-    if send_type == 'recovery':
-        html_content = f"""/
-           <html>
-               <head>
-               </head>
-               <body style="background-color: #FAFAD2;">
-               <div>
-                   <p>{dict['Hello']}, {user_name}!</p>
-                   <p>{dict['mail_recovery_requested']}<p>
-                   <p>{dict['Your_new_password']} <strong>{new_password}</strong></p>
-                   <p>{dict['Dont_forget']}!</p>
-                   <br>
-                   <br>
-                   <p><i>{dict['Best_regards']} FitApp</i></p>
-               </div>
-               </body>
-           </html>
-           """
+        first_line = 'You have requested a password recovery email.'
     else:
-        html_content = f"""/
-                   <html>
-                       <head>
-                       </head>
-                       <body style="background-color: #FAFAD2;">
-                       <div>
-                           <p>{dict['Hello']}, {user_name}!</p>
-                           <p>{dict['applied_registration']}<p>
-                           <p>{dict['Your_new_password']} <strong>{new_password}</strong></p>
-                           <p>{dict['Dont_forget']}!</p>
-                           <br>
-                           <br>
-                           <p><i>{dict['Best_regards']} FitApp</i></p>
-                       </div>
-                       </body>
-                   </html>
-                   """
-    subject = f"{dict['temporary_password']}"
-    email_data = {
-        "api_key": smtp2go_api_key,
-        "sender": "takura2012@ukr.net",
-        "to": [
-            target_email
-        ],
-        "subject": subject,
-        "html_body": html_content,
-        "text_body": "Password recovery text body letter"
+        first_line = 'You have requested a registration email.'
+
+    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+    html_to_send = f'''<div style=\"background: #D3D3D3;\">
+                        <h3>Hello, {username}!</h3>
+                        
+                        {first_line} <br>
+                        So we provide to you a new password: <b>{password}</b><br>
+                        Don`t forget to change it in your personal account!<br>
+                        Now you can follow the <u><a href=\"https://teroshynvitaly.pythonanywhere.com/\">link to the application</a></u><br>
+                        <br>
+                        <br>
+                        <i>Best regards, Fit-App developers.</i>
+                        </div>
+'''
+    data = {
+        'Messages': [
+            {
+                "From": {
+                    "Email": "takura2012@gmail.com",
+                    "Name": "Fitness-App"
+                },
+                "To": [
+                    {
+                        "Email": email,
+                        "Name": username
+                    }
+                ],
+                "Subject": "Fitness-App password recovery or registration",
+                "TextPart": "",
+                "HTMLPart": html_to_send,
+                "CustomID": "fit-app-id"
+            }
+        ]
     }
-
-    response = requests.post("https://api.smtp2go.com/v3/email/send", json=email_data)
-
-    if response.status_code == 200:
-        result = "OK"
-    else:
-        a1 = "An error raised:"
-        a2 = response.status_code
-        a3 = response.text
-        result = f'{a1}<br>{a2}<br>{a3}'
-
+    result = mailjet.send.create(data=data)
     return result
 
 
@@ -538,3 +457,53 @@ def get_local_time():
     local_time = user_time.strftime('%H:%M:%S')
 
     return local_time
+
+
+def delete_user_data(user_id):
+    user = User.query.get(user_id)
+    user_plans = Plan.query.filter_by(owner=user.name).all()
+    user_plans_ids = [user_plan.id for user_plan in user_plans]
+    trains = Training.query.filter_by(owner=user.name).all()
+    train_ids = [train.training_id for train in trains]
+    user_trainings = UserTraining.query.filter_by(user_id=user.id).all()
+    user_trainings_ids = [user_training.id for user_training in user_trainings]
+
+    training_exercises_query = db.session.query(TrainingExercise).filter(TrainingExercise.training_id.in_(train_ids))
+    training_exercises_query.delete()
+    plan_trainings_query = db.session.query(Plan_Trainings).filter(Plan_Trainings.plan_id.in_(user_plans_ids))
+    plan_trainings_query.delete()
+    user_training_exercise_query = db.session.query(UserTrainingExercise).filter(
+        UserTrainingExercise.user_training_id.in_(user_trainings_ids))
+    user_training_exercise_query.delete()
+
+    db.session.query(Plan).filter_by(owner=user.name).delete()
+    db.session.query(Training).filter_by(owner=user.name).delete()
+    db.session.query(UserTraining).filter_by(user_id=user_id).delete()
+
+    db.session.delete(user)
+
+    db.session.commit()
+    return ''
+
+
+def nd_filter_exercises(used_filters_list, used_target_filter):
+    filtered_exercises = []
+
+    # Создаем список условий для каждой группы фильтров - хз как оно работате делал чатГПТ. главное работает
+    group_conditions = []
+    for group in used_filters_list:
+        group_condition = or_(*[Exercise.filters.contains(filter) for filter in group])
+        group_conditions.append(group_condition)
+
+    # Объединяем все групповые условия оператором and_
+    combined_condition = and_(*group_conditions)
+
+    # Применяем фильтр к запросу
+    filtered_exercises = Exercise.query.filter(combined_condition).all()
+
+    if used_target_filter != 'Все':
+        exercises = [ex for ex in filtered_exercises if ex.target == used_target_filter]    # отбираю по полю таргет
+    else:
+        exercises = filtered_exercises  # если фильтр -1 (все) то не фильтрую
+
+    return exercises
