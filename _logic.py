@@ -372,6 +372,40 @@ def load_localization_dict():
     return phrases_list
 
 
+def get_pref_lang():
+    browser_lang = request.headers.get('Accept-Language')
+    pls = browser_lang.split(',')
+    prefered_languages = [pl[:2] for pl in pls]
+
+    for lng in prefered_languages:
+        if lng == 'uk':
+            lng = 'UA'
+            break
+        if lng == 'en':
+            lng = 'EN'
+            break
+        if lng == 'ru':
+            lng = 'RU'
+            break
+        if lng == 'pl':
+            lng = 'PL'
+            break
+        else:
+            lng = 'EN'
+
+    # chrome
+    # uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7,ru;q=0.6
+    # ru,uk-UA;q=0.9,uk;q=0.8,en-US;q=0.7,en;q=0.6
+    # uk,ru;q=0.9,uk-UA;q=0.8,en-US;q=0.7,en;q=0.6
+    # pl,uk;q=0.9,ru;q=0.8,uk-UA;q=0.7,en-US;q=0.6,en;q=0.5
+
+    # edge
+    # ru,en;q=0.9,en-GB;q=0.8,en-US;q=0.7
+    # uk,en;q=0.9,en-GB;q=0.8,en-US;q=0.7,ru;q=0.6
+    # pl,uk;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,ru;q=0.5
+    return lng
+
+
 def local_flash(key):
     languages = config.LANGUAGES
     default_language = 'EN'
@@ -379,7 +413,7 @@ def local_flash(key):
     if not current_user or current_user.is_anonymous:
 
         browser_lang = request.headers.get('Accept-Language')
-
+        print(browser_lang)
         langs = browser_lang.split(';')
         for lang in langs:
             for defined_lang in languages:

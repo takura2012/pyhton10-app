@@ -7,7 +7,11 @@
 
 
 <div class="container text-center m-3">
-<h3>{{local_dict['Workout complete'][current_user.language]}}!</h3>
+    {% if start_time != 0 %}
+        <h3>{{local_dict['Workout complete'][current_user.language]}}!</h3>
+    {% else %}
+        <h3 class="text-danger" style="text-decoration: line-through;">{{local_dict['Workout complete'][current_user.language]}}!</h3>
+    {% endif %}
 </div>
 <div class="mb-3">
     <a href="/statistics" class="statistics-btn d-inline-flex p-2 fw-bold fs-6 link-underline link-underline-opacity-0">
@@ -17,11 +21,13 @@
     {{local_dict['Main'][current_user.language]}}
 </a>
 </div>
+{% if start_time != 0 %}
 <div class="">
     {{local_dict['started'][current_user.language]}}: {{start_time}} <br>
     {{local_dict['Completed'][current_user.language]}}: {{finish_time}}<br>
     {{local_dict['lead_time'][current_user.language]}}: {{workout_duration}}
 </div>
+{% endif %}
 
 <div class="row mb-0 fs-5">
         <div class="col mb-0 px-3 fw-semibold">

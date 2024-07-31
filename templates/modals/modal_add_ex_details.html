@@ -1,0 +1,43 @@
+<!-- Modal -->
+<div class="modal fade" id="modal_id_add{{ex.exercise_id}}" tabindex="-1" aria-labelledby="modal_id_add{{ex.exercise_id}}_Label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content nd-modal-menu">
+      <div class="modal-header nd-main-color">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ex.name}}</h1>
+        <a class="nd-main-color" data-bs-dismiss="modal" aria-label="Close">
+<!--          cross close-->
+          <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          </svg>
+        </a>
+      </div>
+
+        <div class="modal-body">
+            <div class="nd-main-color m-2 ms-0 input-dark" style="width: 100%; min-height: 300px;">
+                place for img or video
+            </div>
+            <div class="d-flex m-0">
+                <div class="nd-main-color m-0" style="width: 50%;">
+                    Sets :
+                    <input name="sets" type="number" class="form-control-sm input-dark" style="width: 100%;">
+                </div>
+                <div class="nd-main-color m-0 " style="width: 50%;">
+                    Reps 2:
+                    <input name="reps" type="number" class="form-control-sm input-dark" style="width: 100%;">
+                </div>
+            </div>
+
+            <input name="training_id" type="hidden" value="{{training_id}}">
+            <input name="exercise_id" type="hidden" value="{{ex.exercise_id}}">
+
+        </div>
+
+      <div class="modal-footer">
+          <div class="nd-main-color">
+              <input type="submit" class="btn btn-primary" value="Add exercise">
+          </div>
+
+      </div>
+    </div>
+  </div>
+</div>

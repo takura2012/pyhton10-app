@@ -1,0 +1,61 @@
+{% extends 'nd/nd_base.html' %}
+{% block title %}
+{{plan.name}}
+{% endblock %}
+
+{% block body %}
+<div class="nd-body">
+
+    <div class="new-design-header d-flex justify-content-between mt-2 mb-3">
+<!--        ------------    left arrow (back) -->
+        <div class="nd-header-menu mx-3 pt-2">
+            <a href="/nd_plan_edit/{{plan_id}}" class="stretched">
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+            </a>
+        </div>
+
+        <div class="nd-header-menu me-5 fw-semibold text-center">
+            <div class="fs-4">Add to</div>
+            <div class="">{{plan.name}}</div>
+        </div>
+
+<!--                  filter    (filter modal)      -->
+        <div class="nd-header-menu mx-3 pt-2">
+            <a href="#" class="stretched" data-bs-toggle="modal" data-bs-target="#nd_modal_workout_filter">
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                  <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                </svg>
+            </a>
+        </div>
+
+
+    </div>
+
+    <hr class="text-white">
+{% for train in trains_struc %}
+    <div class="new-design-workout m-2">
+        <a href="#" class="stretched">
+            <div class="mb-2">{{train.name}}</div>
+            <div class="nd-items-description">Owner: {{train.owner}}</div>
+            <div class="nd-items-description">Exercises: {{train.ex_count}}</div>
+            <div class="nd-items-description">Duration: {{train.duration}}</div>
+        </a>
+    </div>
+{% endfor %}
+
+
+
+</div>
+
+    {% include "modals/nd_modal_workout_filter.html" %}
+
+<!--<script>-->
+<!--        document.getElementById('submitRenamePlan').addEventListener('click', function(e) {-->
+<!--            e.preventDefault();-->
+<!--            document.getElementById('modalRenamePlan').submit();-->
+<!--        });-->
+<!--</script>-->
+
+{% endblock %}

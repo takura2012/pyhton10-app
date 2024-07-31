@@ -6,15 +6,15 @@
 {% block body %}
 
 {% include "/modals/flash_mess.html" %}
-
+<div class="">
 <!-- Раздел Имя тренировки -->
-        <div class="row mt-3">
-            <div class="col-8">
+        <div class="row m-2">
+            <div class="col-7">
                 <h3>{{train_local_name}}</h3>
             </div>
 
 
-            <div class="col-4">
+            <div class="col-5 px-2">
                 <a href="/new_train" class="mx-3 link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
                     {{local_dict['Back'][current_user.language]}}
                 </a>
@@ -105,12 +105,10 @@
 {% if train.owner == current_user.name or current_user.role == "admin" %}
     <!-- Раздел Фильтры -->
     <form action="/get_exercise_filter_list" method="post">
-
+        <div class="px-3"><b>{{local_dict['Exercises_filters'][current_user.language]}}:</b></div>
         <div class="row mb-0">
-            <div class="col-2">
-                <b>{{local_dict['Exercises_filters'][current_user.language]}}:</b>
-            </div>
-            <div class="col-2">
+
+            <div class="col-6">
 
                 <div class="container-fluid">
                 <select name="select_target" id="select_target" class="form-select form-select-md mb-3 me-2" aria-label=".form-select-md example">>
@@ -120,19 +118,19 @@
                 </select>
                 </div>
             </div>
-            <div class="col-2">
+            <div class="col-6">
                 <input type="submit" class="btn btn-primary" value="{{local_dict['Apply filters'][current_user.language]}}">
                 <input type="hidden" name="train_id" value="{{train_id}}">
 
-            </div>
-            <div class="col-7">
+<!--            </div>-->
+<!--            <div class="col">-->
 
             </div>
         </div>
         <hr>
         <div class="row mb-2">
                     {% for i in range(config_filters|length) %}
-            <div class="col-2">
+            <div class="col-4">
                         {% for key, filter in config_filters[i].items() %}
 
                             <div class="form-check">
@@ -162,7 +160,7 @@
                 <div class="row mb-2">
                 <div class="col-3">
                     {{local_dict['Sets'][current_user.language]}} <br>
-                    <input type="number" name="sets" id="sets" class="form-control mb-2" required>
+                    <input type="number" name="sets" id="sets" class="form-control mb-2 no-outline" required>
                 </div>
                 <div class="col-3">
                     {{local_dict['Repetitions'][current_user.language]}} <br>
@@ -193,7 +191,7 @@
     {% endif %}
 {% endif %}
 
-
+</div>
 {% endblock %}
 
 

@@ -42,16 +42,33 @@ $(document).ready(function() {
         }
     });
 
-
+// ----------------- http://127.0.0.1:5000/plan_new/17
+// ------------------изменения фильтров
     $('[name="plan_new_radio_filter"]').on('change', function(){
 
         var checkedValue = $(this).val();
+        const selectElement = document.getElementById("select_train");
         if (checkedValue === "personal") {
             $('option[data-owner="admin"]').css('display', 'none');
             $('option:not([data-owner="admin"])').css('display', 'block');
+
+            const firstNonAdminOption = selectElement.querySelector('option:not([data-owner="admin"])');
+            if (firstNonAdminOption) {
+              firstNonAdminOption.selected = true;
+            }
+            $('#select_train').trigger('change');
+
         } else if (checkedValue === "common") {
+        console.log('checkedValue === "common"')
             $('option[data-owner="admin"]').css('display', 'block');
             $('option:not([data-owner="admin"])').css('display', 'none');
+
+            const firstAdminOption = selectElement.querySelector('option[data-owner="admin"]');
+            if (firstAdminOption) {
+              firstAdminOption.selected = true;
+            }
+            $('#select_train').trigger('change');
+
         } else {
             $('option[data-owner="admin"]').css('display', 'block');
             $('option:not([data-owner="admin"])').css('display', 'block');

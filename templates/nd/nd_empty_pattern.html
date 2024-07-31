@@ -1,0 +1,26 @@
+{% extends 'nd/nd_base.html' %}
+{% block title %}
+TITLE
+{% endblock %}
+
+{% block body %}
+
+<div class="nd-body">
+
+</div>
+
+<form action="/nd_new_train" id="modalCreate" method="post">
+    {% include "/modals/nd_modal_workout_menu.html" %}
+</form>
+
+
+<script>
+        document.getElementById('submitCreate').addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('createclick');
+            document.getElementById('modalCreate').submit();
+        });
+</script>
+
+
+{% endblock %}

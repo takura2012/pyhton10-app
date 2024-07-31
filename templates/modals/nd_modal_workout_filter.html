@@ -1,0 +1,48 @@
+<!-- Modal -->
+<div class="modal fade " id="nd_modal_workout_filter" tabindex="-1" aria-labelledby="nd_modal_workout_filter_Label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content nd-modal-menu">
+      <div class="modal-header nd-main-color">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">WORKOUT</h1>
+<!--      ----------------------------  CROSS CLOSE -->
+        <a class="nd-main-color" data-bs-dismiss="modal" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          </svg>
+        </a>
+      </div>
+<!--        modal body (inputs)-->
+      <div class="modal-body nd-main-color">
+
+          <div class="form-check mb-2">
+              <input type="radio" class="form-check-input" id="radio_all" name="workout_radio">
+              <label class="form-check-label" for="radio_all">
+                All workouts
+              </label>
+          </div>
+          <div class="form-check mb-2">
+              <input type="radio" class="form-check-input" id="radio_common" name="workout_radio">
+              <label class="form-check-label" for="radio_common">
+                Common workouts
+              </label>
+          </div>
+          <div class="form-check mb-2">
+              <input type="radio" class="form-check-input" id="radio_user" name="workout_radio">
+              <label class="form-check-label" for="radio_user">
+                My workouts
+              </label>
+          </div>
+          <div class="mb-2">
+              <input type="text" class="form-control" placeholder="Keyword search">
+          </div>
+
+          <input type="submit" class="btn btn-sm btn-primary" value="Use filters">
+
+      </div>
+      <div class="modal-footer">
+
+
+      </div>
+    </div>
+  </div>
+</div>

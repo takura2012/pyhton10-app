@@ -6,7 +6,7 @@ WORKOUTS
 {% block body %}
 
 <div class="nd-body">
-
+<!--                  menu lines          -->
     <div class="new-design-header d-flex justify-content-between mt-2">
         <div class="nd-header-menu ms-3">
             <a href="#" class="stretched" data-bs-toggle="modal" data-bs-target="#nd_modal_workout_menu">
@@ -38,17 +38,20 @@ WORKOUTS
 
 </div>
 
-<form action="/new_train" id="modalCreate" method="post">
+<form action="/nd_new_train" id="modalCreate" method="post">
     {% include "/modals/nd_modal_workout_menu.html" %}
 </form>
 
-{% endblock %}
 
 <script>
         document.getElementById('submitCreate').addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('createclick');
             document.getElementById('modalCreate').submit();
         });
 </script>
+
+
+{% endblock %}
 
 </html>

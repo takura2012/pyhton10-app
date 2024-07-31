@@ -35,8 +35,12 @@ ADD
     <div class="mt-3">
         {% for ex in exercises %}
         <div class="d-flex">
+            <div class="new-design-workout m-2 me-0" style="width: 100px; background-color: #FFFAF0">
+                spase for img
+            </div>
             <div class="new-design-workout m-2 p-1 w-100">
-                <a href="/nd_add_ex_details/{{training_id}}-{{ex.exercise_id}}" class="stretched">
+<!--                <a href="/nd_add_ex_details/{{training_id}}-{{ex.exercise_id}}" class="stretched">-->
+                <a href="#" class="stretched" data-bs-toggle="modal" data-bs-target="#modal_id_add{{ex.exercise_id}}">
                     <div class="">
                         {{ex.name}}
                     </div>
@@ -46,6 +50,7 @@ ADD
             </div>
 
         </div>
+
         {% endfor %}
     </div>
 
@@ -57,6 +62,11 @@ ADD
     {% include "/modals/nd_modal_ex_filters.html" %}
 </form>
 
+{% for ex in exercises %}
+    <form action="/nd_add_ex_to_train" method="post">
+        {% include 'modals/modal_add_ex_details.html' %}
+    </form>
+{% endfor %}
 
 <script>
         document.getElementById('submitFilters').addEventListener('click', function(e) {
@@ -71,3 +81,8 @@ ADD
 
 
 
+<a href="#" class="stretched" data-bs-toggle="modal" data-bs-target="#nd_modal_workout_manage">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+            </a>

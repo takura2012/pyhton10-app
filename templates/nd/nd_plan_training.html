@@ -1,0 +1,70 @@
+{% extends 'nd/nd_base.html' %}
+{% block title %}
+{{plan.name}}
+{% endblock %}
+
+{% block body %}
+<div class="nd-body">
+
+    <div class="new-design-header d-flex justify-content-between mt-2 mb-3">
+        <div class="nd-header-menu mx-3">
+
+<!--        ------------    left arrow (back) -->
+            <a href="/nd_plans_all" class="stretched">
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+            </a>
+        </div>
+
+        <div class="nd-header-menu me-5 fw-semibold text-center">
+            {{plan.name}}
+        </div>
+
+<!--                  menu lines    (management modal)      -->
+        <div class="nd-header-menu mx-3">
+            <a href="#" class="stretched" data-bs-toggle="modal" data-bs-target="#nd_modal_plan_manage">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+            </a>
+        </div>
+
+
+    </div>
+
+    {% for item in trains_struc %}
+    <div class="new-design-workout m-2">
+        <a href="#" class="stretched">
+            <div class="mb-2">{{item[1]}}</div>
+            <div class="nd-items-description">Exercises: {{item[2]}}</div>
+            <div class="nd-items-description">Duration: {{item[3]}}</div>
+        </a>
+    </div>
+    {% endfor %}
+
+<!--  --------------------------BIG PLUS (add link)------------------->
+    <div class="">
+        <div class="new-design-add-ex mx-5 mt-1 mb-3 text-center">
+            <a href="/nd_add_workout_to_plan/{{plan.id}}" class="stretched fs-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<form action="/nd_rename_plan" id="modalRenamePlan" method="post">
+    {% include "modals/nd_modal_plan_manage.html" %}
+</form>
+
+<script>
+        document.getElementById('submitRenamePlan').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('modalRenamePlan').submit();
+        });
+</script>
+
+{% endblock %}

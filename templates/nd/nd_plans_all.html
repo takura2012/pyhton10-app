@@ -1,0 +1,49 @@
+{% extends 'nd/nd_base.html' %}
+{% block title %}
+PLANS
+{% endblock %}
+
+{% block body %}
+
+<div class="nd-body">
+    <div class="new-design-header d-flex justify-content-between mt-2 mb-3">
+        <div class="nd-header-menu ms-3">
+<!--        --------------------------------------    MENU LINES -->
+            <a href="#" class="stretched" data-bs-toggle="modal" data-bs-target="#nd_modal_plans_menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+            </a>
+        </div>
+        <div class=""></div>
+        <div class="nd-header-menu me-5 fw-semibold">
+            PLANS
+        </div>
+    </div>
+
+    {% for item in data %}
+    <a href="/nd_plan_edit/{{item.plan_id}}" class="stretched">
+        <div class="plan-item mx-3 mb-3 p-2">
+            <div class="mb-2">{{item.plan_name}}</div>
+            <div class="nd-items-description">Owner: {{item.plan_owner}}</div>
+            <div class="nd-items-description">Workouts: {{item.workouts_count}}</div>
+        </div>
+    </a>
+    {% endfor %}
+
+</div>
+<form action="/nd_create_plan" id="nd_create_plan" method="post">
+    {% include 'modals/nd_modal_plans_menu.html' %}
+</form>
+
+
+<script>
+        document.getElementById('submitCreate').addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('createclick');
+            document.getElementById('nd_create_plan').submit();
+        });
+</script>
+
+
+{% endblock %}

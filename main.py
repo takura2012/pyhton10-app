@@ -52,19 +52,8 @@ def inject_local_dict():
 def user_login():
 
     languages = config.LANGUAGES
-    default_language = 'EN'
 
-    browser_lang = request.headers.get('Accept-Language')
-
-    langs = browser_lang.split(';')
-    for lang in langs:
-        for defined_lang in languages:
-            if defined_lang.lower() in lang:
-                default_language = defined_lang
-                break
-        else:
-            continue
-        break
+    default_language = get_pref_lang()
 
     if request.method == 'POST':
         username = request.form['username']
@@ -93,7 +82,10 @@ def user_logout():
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    default_language = session.get('default_language', 'EN')
+    # default_language = session.get('default_language', 'EN')
+
+    default_language = get_pref_lang()
+
     config_filters = config.FILTER_LIST
     user_filters = [[key for key, value in filter.items()] for filter in config_filters]
 
@@ -122,12 +114,13 @@ def register():
             user = User(name=username, password=hashed_password, email=email, preferences=preferences,
                         language=default_language, date_registration=date_registration, date_last_activity=date_last_activity)
             db.session.add(user)
-            res = send_api_email(email, password, username, 'registration')
-            if res.status_code == 200:
+            # res = send_api_email(email, password, username, 'registration')
+            # if res.status_code == 200:
+            if True:
                 try:
                     db.session.commit()
-
-                    local_flash('success_register')
+                    # local_flash('success_register')
+                    flash(f'Your temporary password: {password}\nChange it in your Account.')
                 except:
                     db.session.rollback()
                     local_flash('Base_error')
@@ -151,17 +144,7 @@ def register():
 def index():
 
     languages = config.LANGUAGES
-    default_language = 'EN'
-    browser_lang = request.headers.get('Accept-Language', 'EN')
-    langs = browser_lang.split(';')
-    for lang in langs:
-        for defined_lang in languages:
-            if defined_lang.lower() in lang:
-                default_language = defined_lang
-                break
-        else:
-            continue
-        break
+    default_language = get_pref_lang()
     session['default_language'] = default_language
     if not current_user.is_anonymous:
         current_user.date_last_activity = datetime.utcnow()
@@ -1283,16 +1266,22 @@ def statistics():
     for u_tr in u_utr:
         train = Training.query.get(u_tr.training_id)
         if train:
-            local_names = json.loads(train.local_names)
-            local_name = local_names[current_user.language]
+            if train.owner != current_user.name:
+                local_names = json.loads(train.local_names)
+                local_name = local_names[current_user.language]
+            else:
+                local_name = train.name
             uncompleted_trainings.append([train, u_tr.id, local_name])
 
     completed_trainings = []
     for c_tr in c_utr:
         train = Training.query.get(c_tr.training_id)
         if train:
-            local_names = json.loads(train.local_names)
-            local_name = local_names[current_user.language]
+            if train.owner != current_user.name:
+                local_names = json.loads(train.local_names)
+                local_name = local_names[current_user.language]
+            else:
+                local_name = train.name
             # Training, UserTraining.id, количество упражнений, дата завершения
             ex_count=len(train.exercises)
 
@@ -1338,6 +1327,7 @@ def statistic_delete(user_training_id):
 @app.route('/statistics/details/<int:user_training_id>')
 @login_required
 def statistic_details(user_training_id):
+    start_time, finish_time, workout_duration = 0, 0, 0
     user_training = UserTraining.query.get(user_training_id)
     if user_training.user_id != current_user.id:
         local_flash('Base_error')
@@ -1353,19 +1343,17 @@ def statistic_details(user_training_id):
 
     user_prefs = json.loads(current_user.preferences)
     time_delta = timedelta(hours=user_prefs['LTO'])
-    unformatted_start_time = user_training.date_started + time_delta
-    start_time = unformatted_start_time.strftime('%d-%m-%y %H:%M')
 
-    unformatted_finish_time = user_training.date_completed + time_delta
-    finish_time = unformatted_finish_time.strftime('%d-%m-%y %H:%M')
-
-    delta = unformatted_finish_time-unformatted_start_time
-    seconds = delta.seconds
-    hours, seconds = divmod(seconds, 3600)
-    minutes, seconds = divmod(seconds, 60)
-
-
-    workout_duration = f'{hours} {dict["hours"]}. {minutes} {dict["minutes"]}. {seconds} {dict["seconds"]}.'
+    if user_training.date_started:
+        unformatted_start_time = user_training.date_started + time_delta
+        start_time = unformatted_start_time.strftime('%d-%m-%y %H:%M')
+        unformatted_finish_time = user_training.date_completed + time_delta
+        finish_time = unformatted_finish_time.strftime('%d-%m-%y %H:%M')
+        delta = unformatted_finish_time-unformatted_start_time
+        seconds = delta.seconds
+        hours, seconds = divmod(seconds, 3600)
+        minutes, seconds = divmod(seconds, 60)
+        workout_duration = f'{hours} {dict["hours"]}. {minutes} {dict["minutes"]}. {seconds} {dict["seconds"]}.'
 
     user_training_exercises = UserTrainingExercise.query.filter_by(user_training_id=user_training_id).all()
 
@@ -1496,10 +1484,12 @@ def restore_account():
             print(user)
             if user:
                 new_password = generate_random_password(8)
+                print(new_password)
                 hashed_password = generate_password_hash(new_password)
                 user.password = hashed_password
 
                 res = send_api_email(restore_email, new_password, user.name, 'recovery')
+                res.status_code = 200
                 if res.status_code == 200:
                     try:
                         db.session.commit()
@@ -1614,21 +1604,11 @@ def localization_load_phrase(key):
 @app.route('/instructions')
 def instructions():
     languages = config.LANGUAGES
-    default_language = 'EN'
-    browser_lang = request.headers.get('Accept-Language', 'EN')
+    default_language = get_pref_lang()
+
     user_admin = User.query.filter_by(name='admin').first()
     user_prefs = json.loads(user_admin.preferences)
     youtube_link = user_prefs['youtube_link']
-
-    langs = browser_lang.split(';')
-    for lang in langs:
-        for defined_lang in languages:
-            if defined_lang.lower() in lang:
-                default_language = defined_lang
-                break
-        else:
-            continue
-        break
 
     return render_template('instructions.html', default_language=default_language, youtube_link=youtube_link)
 
@@ -1751,7 +1731,17 @@ def workouts_new_design():
 @app.route('/nd_edit_workout/<int:training_id>')
 def nd_edit_workout(training_id):
     training = Training.query.get(training_id)
-    return render_template('nd/nd_edit_workout.html', training=training)
+    training_exercises = TrainingExercise.query.filter_by(training_id=training_id).all()
+    data = []
+    for training_exercise in training_exercises:
+        exercise = Exercise.query.get(training_exercise.exercise_id)
+        sets = training_exercise.sets
+        reps = training_exercise.repetitions
+        duration = exercise.time_per_set*sets
+        data.append([exercise, sets, reps, duration, training_exercise.id])
+        # [[Exercise 61, 1, 1], [Exercise 4, 3, 12], [Exercise 7, 3, 10], [Exercise 3, 3, 12], [Exercise 61, 1, 1]]
+
+    return render_template('nd/nd_edit_workout.html', training=training, data=data)
 
 
 @app.route('/nd_add_ex/<int:training_id>')
@@ -1786,6 +1776,23 @@ def nd_add_ex(training_id):
                            filters_target=filters_target, used_filters_list=used_filters_list, used_target_filter=used_target_filter)
 
 
+@app.route('/nd_add_ex_to_train', methods=['POST', 'GET'])
+def nd_add_ex_to_train():
+    sets = request.form.get('sets')
+    reps = request.form.get('reps')
+    train_id = request.form.get('training_id')
+    ex_id = request.form.get('exercise_id')
+    training_exercise = TrainingExercise(training_id=train_id, exercise_id=ex_id, sets=sets, repetitions=reps)
+    db.session.add(training_exercise)
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+    return redirect(url_for('nd_edit_workout', training_id = train_id))
+
+
 @app.route('/nd_ex_filters', methods=['POST', 'GET'])
 def nd_ex_filters():
     filters = config.FILTER_LIST
@@ -1803,6 +1810,225 @@ def nd_ex_filters():
     url = url_for('nd_add_ex', training_id=training_id, target_filter=target_filter,
                   used_filters_json=used_filters_json)
     return redirect(url)
+
+
+@app.route('/nd_new_train', methods=['POST', 'GET'])
+def nd_new_train():
+
+    if request.method == 'POST':
+        train_name = request.form.get('train_name')
+        new_name = generate_unique_train_name(train_name)
+
+        new_train = Training(name=new_name, owner=current_user.name)
+        db.session.add(new_train)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            local_flash('Base_error')
+            return redirect(url_for('index'))
+
+
+    return redirect(url_for('nd_edit_workout', training_id=new_train.training_id))
+
+
+@app.route('/nd_delete_train/<int:training_id>')
+def nd_delete_train(training_id):
+
+    train = Training.query.get(training_id)
+
+    if train.owner != current_user.name:
+        local_flash('No_delete_rights')
+        return redirect(url_for('edit_train', train_id=training_id))
+
+    user_training = UserTraining.query.filter_by(training_id=training_id).first()
+    if user_training:
+        train.owner = 'old_training'
+        try:
+            db.session.commit()
+        except:
+            local_flash('Base_error')
+            # flash('Не удалось переместить тренировку в старые')
+            db.session.rollback()
+        return redirect(url_for('new_train'))
+
+    user_trains = UserTraining.query.filter_by(training_id=training_id).all()
+    user_trains_ids = [user_train.id for user_train in user_trains]
+    user_train_exercises = UserTrainingExercise.query.filter(UserTrainingExercise.user_training_id.in_(user_trains_ids)).all()
+
+    for user_train in user_trains:
+        db.session.delete(user_train)
+
+    for user_train_exercise in user_train_exercises:
+        db.session.delete(user_train_exercise)
+
+    plan_trains = Plan_Trainings.query.filter_by(training_id=training_id).all()
+    for plan_train in plan_trains:
+        db.session.delete(plan_train)
+
+    db.session.delete(train)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        local_flash('Base_error')
+        # return f'Ошибка базы данных: Не удалось удалить тренировку {train.name} (id: {train.training_id})или связанные данные.\n {e}'
+
+
+    return redirect(url_for('workouts_new_design'))
+
+
+@app.route('/nd_rename_train', methods=['POST', 'GET'])
+def nd_rename_train():
+    train_id = request.form.get('tarin_id_hidden')
+    name = request.form.get('new_train_name')
+    new_name = generate_unique_train_name(name)
+    training = Training.query.get(train_id)
+    training.name = new_name
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+
+    return redirect(url_for('workouts_new_design'))
+
+
+@app.route('/nd_te_edit', methods=['POST', 'GET'])
+def nd_te_edit():
+    te_id = request.form.get('te_id_hidden')
+    sets = request.form.get('sets')
+    reps = request.form.get('reps')
+
+    te = TrainingExercise.query.get(te_id)
+    te.sets = sets
+    te.repetitions = reps
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+    return redirect(url_for('nd_edit_workout', training_id = te.training_id))
+
+
+@app.route('/nd_te_delete/<int:te_id>')
+def nd_te_delete(te_id):
+    te = TrainingExercise.query.get(te_id)
+    db.session.delete(te)
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+    return redirect(url_for('nd_edit_workout', training_id = te.training_id))
+
+
+@app.route('/nd_plans_all')
+def nd_plans_all():
+    user_plans = Plan.query.filter(or_(Plan.owner==current_user.name, Plan.owner=='admin')).all()
+    data = []
+    for plan in user_plans:
+        workouts_count = len(Plan_Trainings.query.filter_by(plan_id=plan.id).all())
+        data.append({'plan_id': plan.id, 'plan_name': plan.name, 'workouts_count': workouts_count, 'plan_owner': plan.owner})
+
+
+    return render_template('nd/nd_plans_all.html', data=data)
+
+
+@app.route('/nd_plan_edit/<int:plan_id>')
+def nd_plan_edit(plan_id):
+    trains_struc = []
+    plan = Plan.query.get(plan_id)
+    plan_trains = Plan_Trainings.query.filter_by(plan_id=plan_id).all()
+    for plan_train in plan_trains:
+        train = Training.query.get(plan_train.training_id)
+        training_exercises = TrainingExercise.query.filter_by(training_id=train.training_id).all()
+        train_duration = 0
+        ex_count = len(training_exercises)
+        for te in training_exercises:
+            ex = Exercise.query.get(te.exercise_id)
+            train_duration += ex.time_per_set*te.sets
+
+        trains_struc.append([plan_train.id, train.name, ex_count, train_duration])
+
+    return render_template('nd/nd_plan_training.html', plan=plan, trains_struc=trains_struc)
+
+
+@app.route('/nd_create_plan', methods=['POST', 'GET'])
+def nd_create_plan():
+    plan_name = request.form.get('plan_name')
+    if plan_name == '':
+        unique_name = generate_unique_plan_name('new_plan')
+    else:
+        unique_name = generate_unique_plan_name(plan_name)
+
+    plan = Plan(name=unique_name, owner=current_user.name)
+    db.session.add(plan)
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+    return redirect(url_for('nd_plans_all'))
+
+
+@app.route('/nd_rename_plan', methods=['POST', 'GET'])
+def nd_rename_plan():
+
+    plan_id = request.form.get('plan_id_hidden')
+    new_plan_name = request.form.get('new_plan_name')
+    plan = Plan.query.get(plan_id)
+
+    if new_plan_name == '':
+        return redirect(url_for('nd_plan_edit', plan_id=plan_id))
+    else:
+        unique_name = generate_unique_plan_name(new_plan_name)
+
+    plan.name = unique_name
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+    return redirect(url_for('nd_plan_edit', plan_id=plan_id))
+
+
+@app.route('/nd_delete_plan/<int:plan_id>', methods=['POST', 'GET'])
+def nd_delete_plan(plan_id):
+    plan_trains = Plan_Trainings.query.filter_by(plan_id=plan_id).all()
+    plan = Plan.query.get(plan_id)
+    for plan_train in plan_trains:
+        db.session.delete(plan_train)
+    db.session.delete(plan)
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+    return redirect(url_for('nd_plans_all'))
+
+
+@app.route('/nd_add_workout_to_plan/<int:plan_id>')
+def add_workout_to_plan(plan_id):
+    plan = Plan.query.get(plan_id)
+    trains_struc = []
+    train_conditions = or_(Training.owner == current_user.name, Training.owner == 'admin')
+    trains = Training.query.filter(train_conditions).all()
+    for train in trains:
+        training_exercises = TrainingExercise.query.filter_by(training_id=train.training_id).all()
+        train_duration = 0
+        ex_count = len(training_exercises)
+        for te in training_exercises:
+            ex = Exercise.query.get(te.exercise_id)
+            train_duration += ex.time_per_set*te.sets
+
+        trains_struc.append({'id': train.training_id, 'name': train.name, 'owner': train.owner , 'ex_count': ex_count, 'duration': train_duration})
+    print(trains_struc)
+
+    return render_template('nd/nd_add_workout_to_plan.html', plan_id=plan_id, plan=plan, trains_struc=trains_struc)
 
 # -------------------------------------------------------------------------------------
 if __name__ == '__main__':
