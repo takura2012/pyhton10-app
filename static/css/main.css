@@ -71,7 +71,17 @@ body {
     display: flex;
     justify-content: center;
     /* align-items: center; */
+}
 
+.center-block-vh {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.center-block-vh input {
+    min-width: 250px;
 }
 
 .index-div {
@@ -110,10 +120,11 @@ body {
     background-color: rgb(255,222,173);
     border: 1px solid rgb(139,69,19);
     position: absolute;
-    top: 10%; /* Расположение блока сверху страницы */
+    top: 20%; /* Расположение блока сверху страницы */
     left: 0;
-    width:70%;
-    max-width: 300px;
+    width:90%;
+    max-width: 370px;
+    min-height: 100px;
     left: 50%; /* Расположение блока по горизонтали в центре */
     transform: translateX(-50%);
     z-index: 9999; /* Устанавливает блок поверх других элементов */

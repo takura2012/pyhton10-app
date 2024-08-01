@@ -120,7 +120,7 @@ def register():
                 try:
                     db.session.commit()
                     # local_flash('success_register')
-                    flash(f'Your temporary password: {password}\nChange it in your Account.')
+                    flash(f'Your temporary password:\n{password}\nChange it in your Account.')
                 except:
                     db.session.rollback()
                     local_flash('Base_error')
@@ -1471,6 +1471,9 @@ def follow_change_status():
 
 @app.route('/restore_account', methods=['POST', 'GET'])
 def restore_account():
+    # ПОКА ПОЧТЫ НЕ РАБОТАЮТ
+    local_flash('Email_not_supported')
+    return redirect(url_for('index'))
     default_language = session.get('default_language', 'EN')
     if request.method == 'POST':
         restore_email = request.form.get('restore_email')

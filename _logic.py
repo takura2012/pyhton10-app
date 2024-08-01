@@ -411,18 +411,7 @@ def local_flash(key):
     default_language = 'EN'
 
     if not current_user or current_user.is_anonymous:
-
-        browser_lang = request.headers.get('Accept-Language')
-        print(browser_lang)
-        langs = browser_lang.split(';')
-        for lang in langs:
-            for defined_lang in languages:
-                if defined_lang.lower() in lang:
-                    default_language = defined_lang
-                    break
-            else:
-                continue
-            break
+        default_language = get_pref_lang()
     else:
         default_language = current_user.language
 
