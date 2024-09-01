@@ -109,6 +109,7 @@ class Plan(db.Model):
     name = db.Column(db.String, default='New Plan')
     local_names = db.Column(db.Text)
     owner = db.Column(db.String, default='Admin')
+    img = db.Column(db.Text)
 
     trainings = relationship('Training', secondary='plan_trainings', back_populates='plans')
 

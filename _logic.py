@@ -374,6 +374,9 @@ def load_localization_dict():
 
 def get_pref_lang():
     browser_lang = request.headers.get('Accept-Language')
+    if browser_lang is None:
+        return 'EN'
+    print(f'browser_lang={browser_lang}')
     pls = browser_lang.split(',')
     prefered_languages = [pl[:2] for pl in pls]
 

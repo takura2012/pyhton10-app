@@ -2,6 +2,7 @@ DEBUG = True
 SQLALCHEMY_DATABASE_URI = 'sqlite:///fitness.db'
 SESSION_TYPE = 'filesystem'
 RESERVED_NAMES = ['admin', 'админ', 'old_training']
+JWT_SECRET_KEY = 'kjQ[[PQSNH&*HLDHhu11'
 
 
 ACCOUNT_COLORS = {
