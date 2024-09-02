@@ -135,15 +135,20 @@ def api_get_plans():
 
 @api.route('/get_plan/<plan_id>', methods=['GET'])
 def get_plan(plan_id):
-    print(f'PLAN REQUEST id={plan_id}')
+    # print(f'PLAN REQUEST id={plan_id}')
     plan_dict = {}
     plan = Plan.query.get(plan_id)
-    print(plan)
+    # print(plan)
     plan_trainings = Plan_Trainings.query.filter(Plan_Trainings.plan_id == plan_id).all()
     workouts_count = len(plan_trainings)
 
+    plan_owner = User.query.filter_by(name=plan.owner).first()
+    plan_owner_id = plan_owner.id
     plan_dict['plan_id'] = plan_id
     plan_dict['plan_name'] = plan.name
+    plan_dict['plan_owner'] = plan.owner
+    plan_dict['plan_owner_id'] = plan_owner_id
+    plan_dict['plan_img'] = plan.img
     plan_dict['workouts_count'] = workouts_count
     plan_dict['workouts'] = []
 
@@ -164,7 +169,7 @@ def get_plan(plan_id):
                                       'workout_duration': workout_duration
                                       })
 
-    print(json.dumps(plan_dict, ensure_ascii=False, indent=4))
+    # print(json.dumps(plan_dict, ensure_ascii=False, indent=4))
     response = Response(json.dumps(plan_dict, ensure_ascii=False))
     response.mimetype = 'application/json; charset=utf-8'
     return response
