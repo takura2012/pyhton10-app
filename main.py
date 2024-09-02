@@ -26,6 +26,7 @@ app = Flask(__name__)
 app.register_blueprint(api, url_prefix='/api')
 CORS(app, resources={r"/API/*": {"origins": "*"}})
 jwt = JWTManager(app)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=60)
 logging.basicConfig(level=logging.INFO)  # Устанавливаем уровень логгирования (INFO, DEBUG и т. д.)
 logger = logging.getLogger(__name__)
 
