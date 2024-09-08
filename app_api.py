@@ -174,6 +174,50 @@ def get_plan(plan_id):
     response.mimetype = 'application/json; charset=utf-8'
     return response
 
+# ----------------------------------WORKOUTS -----------------------------------------------------------
+
+@api.route('/get_workouts', methods = ['GET'])
+@jwt_required()
+def get_workouts():
+    # print('WORKOUTS GET Request')
+    workouts = []
+    local_names_dict = {}
+    current_user = get_user_from_token()
+    user_language = current_user.language
+
+    conditions = or_(Training.owner == 'admin', Training.owner == current_user.name)
+
+    AllWorkouts = Training.query.filter(conditions).all()
+    response_data = []
+
+    for workout in AllWorkouts:
+
+        local_names = workout.local_names
+        # print(local_names)
+        if local_names:
+            local_names_dict = json.loads(local_names)
+            local_name = local_names_dict.get(current_user.language, workout.name)
+        else:
+            local_name = workout.name
+
+        training_exercises = TrainingExercise.query.filter_by(training_id=workout.training_id).all()
+        workout_duration = 0
+        for train_exercise in training_exercises:
+            exercise = Exercise.query.get(train_exercise.exercise_id)
+            workout_duration += exercise.time_per_set * 3
+        exercises_count = len(training_exercises)
+        # print(f'training_id = {workout.training_id}\nname={local_name}\nowner={workout.owner}')
+        response_data.append({'id': workout.training_id,
+                              'name': local_name,
+                              'owner': workout.owner,
+                              'exercises_count': exercises_count,
+                              'duration': workout_duration
+                              })
+        # print(f'id:{workout.training_id}\nname:{local_name}\nowner:{workout.owner}/n')
+    response = Response(json.dumps(response_data))
+    response.mimetype = 'application/json; charset=utf-8'
+    return response
+
 
 # -----------------------------------UTILS---------------------------------------------------------------
 @api.route('/get_img/<id_name>')
