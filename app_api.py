@@ -134,8 +134,8 @@ def api_get_plans():
 
 
 @api.route('/get_plan/<plan_id>', methods=['GET'])
-def get_plan(plan_id):
-    # print(f'PLAN REQUEST id={plan_id}')
+def api_get_plan(plan_id):
+    print(f'PLAN REQUEST id={plan_id}')
     plan_dict = {}
     plan = Plan.query.get(plan_id)
     # print(plan)
@@ -163,10 +163,11 @@ def get_plan(plan_id):
             exercise = Exercise.query.get(train_exercise.exercise_id)
             workout_duration += exercise.time_per_set*3
 
-        plan_dict['workouts'].append({'workout_id': training_id,
-                                      'workout_name': train.name,
-                                      'exercises_count': len(train_exercises),
-                                      'workout_duration': workout_duration
+        plan_dict['workouts'].append({  'PT_id': plan_training.id,
+                                        'workout_id': training_id,
+                                        'workout_name': train.name,
+                                        'exercises_count': len(train_exercises),
+                                        'workout_duration': workout_duration
                                       })
 
     # print(json.dumps(plan_dict, ensure_ascii=False, indent=4))
@@ -178,7 +179,7 @@ def get_plan(plan_id):
 
 @api.route('/get_workouts', methods = ['GET'])
 @jwt_required()
-def get_workouts():
+def api_get_workouts():
     # print('WORKOUTS GET Request')
     workouts = []
     local_names_dict = {}
@@ -219,9 +220,49 @@ def get_workouts():
     return response
 
 
+@api.route('/plan_add', methods = ['POST'])
+@jwt_required()
+def api_plan_add():
+    current_user = get_user_from_token()
+    user_language = current_user.language
+
+    plan_id = request.form['plan_id']
+    workout_id = request.form['workout_id']
+    # print(f'Recieved POST: plan_id={plan_id}, workout_id={workout_id}')
+    plan = Plan.query.get(plan_id)
+
+    # тут проверка на овнера
+
+    PT = Plan_Trainings(plan_id=plan_id, training_id=workout_id)
+    try:
+        db.session.add(PT)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'fail'})
+
+
+    response = jsonify({'status': 'OK'})
+    return response
+
+
+@api.route('/plan_del_wk', methods = ['POST'])
+@jwt_required()
+def api_plan_del_wk():
+    PT_id = request.form['PT_id']
+    PT = Plan_Trainings.query.get(PT_id)
+    try:
+        db.session.delete(PT)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({'status': 'fail'})
+    print(f'Del request PT_id={PT_id}')
+    return jsonify({'status': 'OK'})
+
 # -----------------------------------UTILS---------------------------------------------------------------
 @api.route('/get_img/<id_name>')
-def get_img(id_name):
+def api_get_img(id_name):
     try:
         id = id_name.split("-", 1)[0]
         img = id_name.split("-", 1)[1]
