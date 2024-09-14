@@ -2,13 +2,13 @@
 from flask import Flask, render_template, url_for, request, redirect, session, flash, jsonify, Response, Blueprint, send_file
 from flask_jwt_extended import get_jwt_identity
 from flask_login import current_user, login_required, login_user
-
+import os
 from sqlalchemy import Column, Integer, String, ForeignKey, and_, or_
 import json
 from _models import Exercise, Muscle, ExerciseMuscle, db, User, Plan, TrainingExercise, \
     Training, UserTraining, UserTrainingExercise, Plan_Trainings, Localization
 import config
-# from _logic import *
+
 
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -16,6 +16,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 
 api = Blueprint('api', __name__)
 
+UPLOAD_FOLDER = './static/users'
 # ------------------------------------------LOGIN/LOGOUT------------------------------------
 def get_user_from_token():
     username = get_jwt_identity()
@@ -134,18 +135,27 @@ def api_get_plans():
 
 
 @api.route('/get_plan/<plan_id>', methods=['GET'])
+@jwt_required()
 def api_get_plan(plan_id):
-    print(f'PLAN REQUEST id={plan_id}')
+
+    current_user = get_user_from_token()
+
     plan_dict = {}
+
     plan = Plan.query.get(plan_id)
-    # print(plan)
+    if plan.local_names:
+        json_names = json.loads(plan.local_names)
+        plan_dict['plan_name'] = json_names.get(current_user.language, plan.name)
+    else:
+        plan_dict['plan_name'] = plan.name
+
     plan_trainings = Plan_Trainings.query.filter(Plan_Trainings.plan_id == plan_id).all()
     workouts_count = len(plan_trainings)
 
     plan_owner = User.query.filter_by(name=plan.owner).first()
     plan_owner_id = plan_owner.id
     plan_dict['plan_id'] = plan_id
-    plan_dict['plan_name'] = plan.name
+
     plan_dict['plan_owner'] = plan.owner
     plan_dict['plan_owner_id'] = plan_owner_id
     plan_dict['plan_img'] = plan.img
@@ -249,8 +259,14 @@ def api_plan_add():
 @api.route('/plan_del_wk', methods = ['POST'])
 @jwt_required()
 def api_plan_del_wk():
+    current_user = get_user_from_token()
+
     PT_id = request.form['PT_id']
     PT = Plan_Trainings.query.get(PT_id)
+    plan = Plan.query.filter_by(id=PT.plan_id).first()
+    if plan.owner != current_user.name:
+        return jsonify({'status': 'DENIED'})
+
     try:
         db.session.delete(PT)
         db.session.commit()
@@ -260,14 +276,60 @@ def api_plan_del_wk():
     print(f'Del request PT_id={PT_id}')
     return jsonify({'status': 'OK'})
 
-# -----------------------------------UTILS---------------------------------------------------------------
-@api.route('/get_img/<id_name>')
-def api_get_img(id_name):
+
+@api.route('/rename_plan', methods = ['POST'])
+@jwt_required()
+def api_rename_plan():
+    current_user = get_user_from_token()
+    user_id = current_user.id
+    plan_id = request.form.get('plan_id')
+    plan = Plan.query.get(plan_id)
+    if current_user.name != plan.owner:
+        return jsonify({'status': 'Denied'})
+
     try:
-        id = id_name.split("-", 1)[0]
-        img = id_name.split("-", 1)[1]
-        url = f'./static/users/{id}/{img}'
+        current_user = get_user_from_token()
+        user_id = current_user.id
+        plan_id = request.form.get('plan_id')
+        plan_name = request.form.get('plan_name')
+        plan = Plan.query.get(plan_id)
+        plan.name = plan_name
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            return jsonify({'status': 'BASEfail'})
+        save_path = os.path.join(UPLOAD_FOLDER, str(user_id))
+        if not os.path.exists(save_path):
+            print('created folder')
+            os.makedirs(save_path)
+
+        file_name = os.path.join(UPLOAD_FOLDER, f'{user_id}/plan{plan_id}.png')
+        # print(file_name)
+
+        if 'image' in request.files:
+            file = request.files['image']
+            # Сохраняем файл
+            if file:
+                file.save(file_name)
+    except:
+        return jsonify({'status': 'GLOBALfail'})
+
+
+    return jsonify({'status': 'OK'})
+# -----------------------------------UTILS---------------------------------------------------------------
+@api.route('/get_img/<plan_id>')
+def api_get_img(plan_id):
+    print('IMAGE REQ')
+    plan = Plan.query.get(plan_id)
+    plan_owner = plan.owner
+    user = User.query.filter_by(name=plan.owner).first()
+    print(user.id)
+    user_id = user.id
+    try:
+        url = f'./static/users/{user_id}/plan{plan_id}.png'
         return send_file(url, mimetype='image/png')
+
     except Exception as e:
         return 'not found'
 
