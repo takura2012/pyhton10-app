@@ -9,7 +9,7 @@ from _models import Exercise, Muscle, ExerciseMuscle, db, User, Plan, TrainingEx
     Training, UserTraining, UserTrainingExercise, Plan_Trainings, Localization
 import config
 
-
+from name_generator import generate_unique_plan_name
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies
@@ -237,6 +237,10 @@ def api_plan_add():
     user_language = current_user.language
 
     plan_id = request.form['plan_id']
+    plan = Plan.query.get(plan_id)
+    if plan.owner != current_user.name:
+        response = jsonify({'status': 'DENIED'})
+        return response
     workout_id = request.form['workout_id']
     # print(f'Recieved POST: plan_id={plan_id}, workout_id={workout_id}')
     plan = Plan.query.get(plan_id)
@@ -317,6 +321,43 @@ def api_rename_plan():
 
 
     return jsonify({'status': 'OK'})
+
+
+@api.route('/plan_new', methods = ['POST'])
+@jwt_required()
+def api_plan_new():
+    current_user = get_user_from_token()
+    new_name = request.form.get('new_name')
+    unique_name = generate_unique_plan_name(new_name)
+    plan = Plan(name=unique_name, owner=current_user.name)
+    db.session.add(plan)
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({'status': 'fail'})
+
+    return jsonify({'status': 'OK', 'id':plan.id})
+
+
+@api.route('plan_delete', methods = ['POST'])
+@jwt_required()
+def plan_delete():
+    current_user = get_user_from_token()
+
+    data = request.get_json()  # Получение JSON-данных
+    plan_id = data.get('id')
+    plan = Plan.query.get(plan_id)
+    if current_user.name != plan.owner:
+        return jsonify({'status': 'DENIED'})
+    db.session.delete(plan)
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({'status': 'BASE ERROR'})
+
+    return jsonify({'status':'OK'})
 # -----------------------------------UTILS---------------------------------------------------------------
 @api.route('/get_img/<plan_id>')
 def api_get_img(plan_id):

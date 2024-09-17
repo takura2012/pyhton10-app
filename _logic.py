@@ -93,21 +93,6 @@ def select_exercises(target_list=['Ноги'], efforts=90, excluded=[],
     return selected_exercises
 
 
-# def convert_dict_to_list(target_days, groups=config.GROUPS):
-#     list_with_empty = [[], [], [], [], [], [], []]
-#     # перебираем словарь targets_dict = 'fullbody':'1,2,3', ...
-#     for key, positions in target_days.items():
-#         poslist = [pos for pos in positions.split(',')]  # из строки делаем список разделяя по запятой '1,2,3'
-#         for pos in poslist:
-#             del list_with_empty[int(pos) - 1]
-#             list_with_empty.insert(int(pos) - 1,
-#                                    groups[key])  # вставляем элемент groups[key] в список list_with_empty на pos
-#     # удаляю пустые подсписки
-#     group_json = [sub for sub in list_with_empty if sub]
-#
-#     return group_json
-
-
 def get_training_connections(train_id):  # te_info = [te, sets, repetitions] (te- Exercise)
 
     train = Training.query.get(train_id)
