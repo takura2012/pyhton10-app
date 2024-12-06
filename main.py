@@ -106,7 +106,7 @@ def register():
             return redirect('register')
 
         password = generate_random_password(8)
-        print(password)
+        # print(password)
         hashed_password = generate_password_hash(password)
         email = request.form['email']
 
@@ -122,13 +122,12 @@ def register():
             user = User(name=username, password=hashed_password, email=email, preferences=preferences,
                         language=default_language, date_registration=date_registration, date_last_activity=date_last_activity)
             db.session.add(user)
-            # res = send_api_email(email, password, username, 'registration')
-            # if res.status_code == 200:
-            if True:
+            res = send_api_email(email, password, username, 'registration')
+            if res['status'] == 200:
                 try:
                     db.session.commit()
-                    # local_flash('success_register')
-                    flash(f'Your temporary password:\n{password}\nChange it in your Account.')
+                    local_flash('success_register')
+                    # flash(f'Your temporary password:\n{password}\nChange it in your Account.')
                 except:
                     db.session.rollback()
                     local_flash('Base_error')
@@ -870,6 +869,7 @@ def plan_new(plan_id):
     trainings = Training.query.filter(conditions).all()
     for train in trainings:
         if train.owner == 'admin':
+            print(train.name)
             train_local_names_loads = json.loads(train.local_names)
             train_local_name = train_local_names_loads[current_user.language]
         else:
@@ -1090,14 +1090,16 @@ def migration_new():
 @app.route('/set_admin_prefs', methods=['GET', 'POST'])
 @login_required
 def set_admin_prefs():
+    print('def set_admin_prefs():')
     user = User.query.filter_by(name='admin').first()
     user_prefs = json.loads(user.preferences)
+    print(user_prefs)
 
     youtube_link = request.form.get('youtube_link', '')
-    smtp2go_api_key = request.form.get('smtp2go_api_key', '')
+    google_api_key = request.form.get('google_api_key', '')
 
     user_prefs['youtube_link'] = youtube_link
-    user_prefs['smtp2go_api_key'] = smtp2go_api_key
+    user_prefs['google_api_key'] = google_api_key
 
     user.preferences = json.dumps(user_prefs)
 
@@ -1541,29 +1543,23 @@ def follow_change_status():
 
 @app.route('/restore_account', methods=['POST', 'GET'])
 def restore_account():
-    # ПОКА ПОЧТЫ НЕ РАБОТАЮТ
-    local_flash('Email_not_supported')
-    return redirect(url_for('index'))
     default_language = session.get('default_language', 'EN')
     if request.method == 'POST':
         restore_email = request.form.get('restore_email')
 
         if not is_valid_email(restore_email):
-            # flash('Электронная почта введена некорректно')
             local_flash('invalid_email')
         else:
             # flash('Сообщение с восстановлением выслано')
             user = User.query.filter_by(email=restore_email).first()
-            print(user)
             if user:
                 new_password = generate_random_password(8)
-                print(new_password)
                 hashed_password = generate_password_hash(new_password)
                 user.password = hashed_password
 
                 res = send_api_email(restore_email, new_password, user.name, 'recovery')
-                res.status_code = 200
-                if res.status_code == 200:
+
+                if res['status'] == 200:
                     try:
                         db.session.commit()
                         local_flash('recovery_mail_sended')
@@ -1572,8 +1568,6 @@ def restore_account():
                         local_flash('Base_error')
                 else:
                     flash('Mail not sended')
-
-
 
             return redirect('user_login')
 

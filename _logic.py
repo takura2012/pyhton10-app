@@ -15,8 +15,8 @@ from _models import Exercise, Muscle, Training, ExerciseMuscle, TrainingExercise
 from typing import List
 from sqlalchemy import or_, and_, desc
 from main import db
-from mailjet_rest import Client
 
+import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -411,17 +411,25 @@ def local_flash(key):
 
 
 def send_api_email(email, password, username, send_type):
+    result = {'status': 400, 'details': 'Email not sended'}
     admin_user = User.query.filter_by(name='admin').first()
     admin_prefs = json.loads(admin_user.preferences)
-    api_key = admin_prefs['mailjet_api_key']
-    api_secret = admin_prefs['mailjet_api_secret']
+
+    api_key = admin_prefs['google_api_key']
     if send_type == 'recovery':
         first_line = 'You have requested a password recovery email.'
     else:
         first_line = 'You have requested a registration email.'
 
-    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
-    html_to_send = f'''<div style=\"background: #D3D3D3;\">
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    sender_email = "fitapp.developers@gmail.com"
+
+    # Настройка письма
+    receiver_email = email
+    subject = "Fitness-App password recovery or registration"
+
+    html = f'''<div style=\"background: #D3D3D3;\">
                         <h3>Hello, {username}!</h3>
                         
                         {first_line} <br>
@@ -433,27 +441,25 @@ def send_api_email(email, password, username, send_type):
                         <i>Best regards, Fit-App developers.</i>
                         </div>
 '''
-    data = {
-        'Messages': [
-            {
-                "From": {
-                    "Email": "takura2012@gmail.com",
-                    "Name": "Fitness-App"
-                },
-                "To": [
-                    {
-                        "Email": email,
-                        "Name": username
-                    }
-                ],
-                "Subject": "Fitness-App password recovery or registration",
-                "TextPart": "",
-                "HTMLPart": html_to_send,
-                "CustomID": "fit-app-id"
-            }
-        ]
-    }
-    result = mailjet.send.create(data=data)
+
+    # Создание письма
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = subject
+
+    message.attach(MIMEText(html, "html"))
+
+    try:
+        # Подключение к SMTP-серверу Gmail
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()  # Включение защищенного соединения
+            server.login(sender_email, api_key)  # Аутентификация
+            server.sendmail(sender_email, receiver_email, message.as_string())  # Отправка письма
+            result = {'status': 200, 'details': 'Email was sended'}
+    except Exception as e:
+        result = {'status': 400, 'details': 'Email not sended (Error sending)'}
+
     return result
 
 
