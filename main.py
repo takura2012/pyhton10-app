@@ -122,21 +122,19 @@ def register():
             user = User(name=username, password=hashed_password, email=email, preferences=preferences,
                         language=default_language, date_registration=date_registration, date_last_activity=date_last_activity)
             db.session.add(user)
-            res = send_api_email(email, password, username, 'registration')
+            res = send_api_email(email, password, user, 'registration')
             if res['status'] == 200:
                 try:
                     db.session.commit()
                     local_flash('success_register')
-                    # flash(f'Your temporary password:\n{password}\nChange it in your Account.')
                 except:
                     db.session.rollback()
                     local_flash('Base_error')
                     return redirect(url_for('register'))
             else:
-                flash('Email not sended')
+                local_flash('Email_not_sent')
         else:
             local_flash('Error_existing_user')
-            # flash('Пользователь с такими данными уже существует')
             return redirect('register')
 
         return redirect(url_for('index'))
@@ -193,7 +191,6 @@ def list_del(counters):
             exercises = Exercise.query.all()
             return render_template('list.html', exercises=exercises, muscles=muscles)
         except Exception as e:
-            # local_flash('Base_error')
             return f'Ошибка при удалении упражнения из базы: {e}'
     else:
         # muscle = Muscle.query.get_or_404(id)
@@ -629,7 +626,6 @@ def train_rename():
         train = Training.query.get(train_id)
         if train.owner != current_user.name:
             local_flash('No_rename_rights')
-            # flash('У вас нет права переименовать эту тренировку')
             return redirect(url_for('edit_train', train_id=train_id))
 
         train_new_name = request.form.get('train_new_name')
@@ -640,7 +636,6 @@ def train_rename():
         except:
             db.session.rollback()
             local_flash('Base_error')
-            # return 'Не удалось сохранить в базу тренировку с новым именем'
             return redirect(url_for('edit_train', train_id=train.training_id))
 
 
@@ -656,7 +651,6 @@ def train_delete():
         train = Training.query.get(train_id)
 
         if train.owner != current_user.name:
-            # flash('У вас нет права удалить эту тренировку')
             local_flash('No_delete_rights')
             return redirect(url_for('edit_train', train_id=train_id))
 
@@ -667,7 +661,6 @@ def train_delete():
                 db.session.commit()
             except:
                 local_flash('Base_error')
-                # flash('Не удалось переместить тренировку в старые')
                 db.session.rollback()
             return redirect(url_for('new_train'))
 
@@ -700,7 +693,6 @@ def train_delete():
 @login_required
 def del_old_train(train_id):
     if current_user.role != 'admin':
-        # flash('Операция запрещена: нет прав')
         local_flash('Base_error')
         return redirect(url_for('index'))
 
@@ -726,8 +718,6 @@ def del_old_train(train_id):
     except Exception as e:
         db.session.rollback()
         local_flash('Base_error')
-        # return f'Ошибка базы данных: Не удалось удалить тренировку {train.name} (id: {train.training_id})или связанные данные.\n {e}'
-
     return redirect(url_for('new_train'))
 
 
@@ -905,7 +895,6 @@ def plan_new(plan_id):
             db.session.commit()
         except:
             db.session.rollback()
-            # flash('Ошибка при сохранении в базу')
             local_flash('Base_error')
             return redirect(url_for('plans_all'))
     else:
@@ -913,7 +902,6 @@ def plan_new(plan_id):
         if not plan:
             return redirect(url_for('plans_all'))
         if plan.owner != current_user.name:
-            # flash('Вы не можете редактировать этот план')
             local_flash('cannot_edit_plan')
             return redirect(url_for('plans_all'))
 
@@ -939,7 +927,6 @@ def save_plan_localization():
         db.session.commit()
     except:
         db.session.rollback()
-        # flash('Ошибка сохранения в базу данных')
         local_flash('Base_error')
         return redirect(url_for('plans_all'))
 
@@ -1011,7 +998,6 @@ def plan_add_train():
         train = Training.query.get(train_id)
 
         if Plan.query.get(plan_id).owner != current_user.name:
-            # flash('У вас нет прав редактировать этот план!')
             local_flash('cannot_edit_plan')
             return redirect(url_for('plans_all'))
 
@@ -1037,7 +1023,6 @@ def del_train_from_plan(plan_trainings_id):
     plan_training = Plan_Trainings.query.get(plan_trainings_id)
     plan_id = plan_training.plan_id
     if Plan.query.get(plan_id).owner != current_user.name:
-        # flash('У вас нет прав редактировать этот план!')
         local_flash('cannot_edit_plan')
         return redirect(url_for('plans_all'))
 
@@ -1172,7 +1157,6 @@ def user_complete_train(train_id):
 
     res = set_train_complete(current_user.id, train_id)
     if res != 'OK':
-        # flash('Ошибка при установке завершения тренировки (запись в базу)')
         local_flash('Base_error')
     return redirect(url_for('index'))
 
@@ -1492,16 +1476,14 @@ def change_password():
                 current_user.password = hashed_password
                 try:
                     db.session.commit()
-                    # flash('Пароль успешно изменен!')
                     local_flash('Password_changed')
                 except:
                     db.session.rollback()
-                    flash('Не удалось изменить пароль')
+                    local_flash('Base_error')
             else:
-                # flash('Новый пароль - поля не совпадают')
                 local_flash('Password_different_fields')
         else:
-            # flash('Неверный пароль')
+            # 'Неверный пароль')
             local_flash('wrong_password')
 
 
@@ -1550,14 +1532,14 @@ def restore_account():
         if not is_valid_email(restore_email):
             local_flash('invalid_email')
         else:
-            # flash('Сообщение с восстановлением выслано')
+            # ('Сообщение с восстановлением выслано')
             user = User.query.filter_by(email=restore_email).first()
             if user:
                 new_password = generate_random_password(8)
                 hashed_password = generate_password_hash(new_password)
                 user.password = hashed_password
 
-                res = send_api_email(restore_email, new_password, user.name, 'recovery')
+                res = send_api_email(restore_email, new_password, user, 'recovery')
 
                 if res['status'] == 200:
                     try:

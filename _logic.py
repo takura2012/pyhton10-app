@@ -410,35 +410,75 @@ def local_flash(key):
     return None
 
 
-def send_api_email(email, password, username, send_type):
+def send_api_email(email, password, user, send_type):
     result = {'status': 400, 'details': 'Email not sended'}
     admin_user = User.query.filter_by(name='admin').first()
     admin_prefs = json.loads(admin_user.preferences)
 
-    api_key = admin_prefs['google_api_key']
-    if send_type == 'recovery':
-        first_line = 'You have requested a password recovery email.'
-    else:
-        first_line = 'You have requested a registration email.'
+    languages = config.LANGUAGES
+    try:
+        language = user.language
+    except:
+        language = get_pref_lang()
 
+
+
+    api_key = admin_prefs['google_api_key']
     smtp_server = "smtp.gmail.com"
     smtp_port = 587
     sender_email = "fitapp.developers@gmail.com"
-
-    # Настройка письма
     receiver_email = email
     subject = "Fitness-App password recovery or registration"
 
-    html = f'''<div style=\"background: #D3D3D3;\">
-                        <h3>Hello, {username}!</h3>
+    local_letter = {
+        'EN': f'''<div style=\"background: #FAFAD2; border-radius: 3px; padding: 20px;\">
+                        <h3>Hello, {user.name}!</h3>
                         
-                        {first_line} <br>
+                        You have requested the password to app.<br>
                         So we provide to you a new password: <b>{password}</b><br>
-                        Don`t forget to change it in your personal account!<br>
+                        Don`t forget to change it in your accounts settings!<br>
                         Now you can follow the <u><a href=\"https://teroshynvitaly.pythonanywhere.com/\">link to the application</a></u><br>
                         <br>
                         <br>
                         <i>Best regards, Fit-App developers.</i>
+''',
+        'RU': f'''<div style=\"background: #FAFAD2; border-radius: 3px; padding: 20px;\">
+                        <h3>Здравствуйте, {user.name}!</h3>
+
+                        Вы запросили пароль для приложения.<br>
+                        Мы предоставили Вам новый пароль: <b>{password}</b><br>
+                        Не забудьте сменить его в настройках акаунта!<br>
+                        Теперь вы можете перейти по <u><a href=\"https://teroshynvitaly.pythonanywhere.com/\">ссылке на приложение</a></u><br>
+                        <br>
+                        <br>
+                        <i>С наилучшими пожеланиями, команда разработчиков.</i>
+''',
+        'UA': f'''<div style=\"background: #FAFAD2; border-radius: 3px; padding: 20px;\">
+                            <h3>Вітаємо, {user.name}!</h3>
+
+                            Ви зробили запрос на пароль для додатку.<br>
+                            Ми надіслали Вам новий пароль: <b>{password}</b><br>
+                            Не забудьте змінити його в настройках акаунта!<br>
+                            Тепер ви можете перейти за <u><a href=\"https://teroshynvitaly.pythonanywhere.com/\">посиланням на додаток</a></u><br>
+                            <br>
+                            <br>
+                            <i>Бажаємо всього найкращого, команда розробників.</i>
+    ''',
+        'PL': f'''<div style=\"background: #FAFAD2; border-radius: 3px; padding: 20px;\">
+                            <h3>Gratulacje, {user.name}!</h3>
+
+                            Poprosiłeś o hasło do aplikacji.<br>
+                            Wysłaliśmy Ci nowe hasło: <b>{password}</b><br>
+                            Nie zapomnij zmienić tego w ustawieniach swojego konta!<br>
+                            Możesz teraz przejść do <u><a href=\"https://teroshynvitaly.pythonanywhere.com/\">linku do aplikacji</a></u><br>
+                            <br>
+                            <br>
+                            <i>Wszystkiego najlepszego, zespół programistów</i>
+    '''
+    }
+
+    html = f'''<div style=\"background: #D3D3D3;\">
+                        {local_letter[language]}
                         </div>
 '''
 
